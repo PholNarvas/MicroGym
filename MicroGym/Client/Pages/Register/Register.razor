@@ -1,0 +1,147 @@
+@page "/register"
+@namespace MicroGym.Client.Pages
+@layout AuthLayout
+
+<PageTitle>Register - MicroGym</PageTitle>
+
+<div class="login-page">
+    <div class="power-stripe"></div>
+    <div class="login-grid">
+
+        <!-- ═══ LEFT: Brand Panel ═══ -->
+        <div class="brand-panel">
+            <div class="brand-glow"></div>
+            <div class="brand-content">
+                <div class="brand-logo">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="52" height="52" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z" />
+                    </svg>
+                </div>
+                <div class="brand-name-block">
+                    <h1 class="brand-name">MICRO<span class="brand-name-accent">GYM</span></h1>
+                    <div class="brand-divider"></div>
+                    <p class="brand-tagline">TRAIN HARD. TRACK RESULTS.</p>
+                </div>
+                <p class="brand-sub">Join thousands of members already achieving their fitness goals.</p>
+                <div class="brand-features">
+                    <div class="feature-item"><span class="feature-icon">▸</span><span>Track workouts &amp; performance</span></div>
+                    <div class="feature-item"><span class="feature-icon">▸</span><span>Monitor member progress</span></div>
+                    <div class="feature-item"><span class="feature-icon">▸</span><span>Manage gym operations</span></div>
+                </div>
+            </div>
+            <div class="brand-footer">&copy; @DateTime.Now.Year MicroGym. All rights reserved.</div>
+        </div>
+
+        <!-- ═══ RIGHT: Form Panel ═══ -->
+        <div class="form-panel">
+            <div class="form-container register-wide">
+
+                <!-- Mobile logo -->
+                <div class="mobile-brand">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z" />
+                    </svg>
+                    MICRO<span>GYM</span>
+                </div>
+
+                <div class="form-header">
+                    <h2>Create Account</h2>
+                    <p>Fill in your details to get started</p>
+                </div>
+
+                <!-- Success State -->
+                @if (isSuccess)
+                {
+                    <div class="ant-alert ant-alert-success ant-alert-with-icon gym-alert">
+                        <span class="ant-alert-icon">✓</span>
+                        <div class="ant-alert-content">
+                            <span class="ant-alert-message">Registration successful!</span>
+                            <span class="ant-alert-description">Your account has been created. <a href="/login" class="footer-link">Sign in here</a></span>
+                        </div>
+                    </div>
+                }
+                else
+                {
+                    <!-- Error Alert -->
+                    @if (!string.IsNullOrEmpty(errorMessage))
+                    {
+                        <div class="ant-alert ant-alert-error ant-alert-with-icon gym-alert">
+                            <span class="ant-alert-icon">⚠</span>
+                            <span class="ant-alert-message">@errorMessage</span>
+                        </div>
+                    }
+
+                    <!-- Form -->
+                    <EditForm Model="registerModel" OnValidSubmit="HandleRegister">
+                        <DataAnnotationsValidator />
+
+                        <!-- Row 1: Username + Email -->
+                        <div class="form-row-2col">
+                            <div class="ant-form-item gym-form-item">
+                                <label class="gym-label">Username</label>
+                                <input class="ant-input ant-input-lg gym-input"
+                                       type="text"
+                                       placeholder="Enter username"
+                                       @bind="registerModel.Username"
+                                       @bind:event="oninput" />
+                                <ValidationMessage For="@(() => registerModel.Username)" class="ant-form-item-explain-error" />
+                            </div>
+                            <div class="ant-form-item gym-form-item">
+                                <label class="gym-label">Email Address</label>
+                                <input class="ant-input ant-input-lg gym-input"
+                                       type="email"
+                                       placeholder="you@example.com"
+                                       @bind="registerModel.Email"
+                                       @bind:event="oninput" />
+                                <ValidationMessage For="@(() => registerModel.Email)" class="ant-form-item-explain-error" />
+                            </div>
+                        </div>
+
+                        <!-- Row 2: Password + Confirm -->
+                        <div class="form-row-2col">
+                            <div class="ant-form-item gym-form-item">
+                                <label class="gym-label">Password</label>
+                                <input class="ant-input ant-input-lg gym-input"
+                                       type="password"
+                                       placeholder="Min. 6 characters"
+                                       @bind="registerModel.Password"
+                                       @bind:event="oninput" />
+                                <ValidationMessage For="@(() => registerModel.Password)" class="ant-form-item-explain-error" />
+                            </div>
+                            <div class="ant-form-item gym-form-item">
+                                <label class="gym-label">Confirm Password</label>
+                                <input class="ant-input ant-input-lg gym-input"
+                                       type="password"
+                                       placeholder="Re-enter password"
+                                       @bind="registerModel.ConfirmPassword"
+                                       @bind:event="oninput" />
+                                <ValidationMessage For="@(() => registerModel.ConfirmPassword)" class="ant-form-item-explain-error" />
+                            </div>
+                        </div>
+
+                        <button type="submit"
+                                class="ant-btn ant-btn-primary ant-btn-lg ant-btn-block gym-btn-primary"
+                                disabled="@isLoading">
+                            @if (isLoading)
+                            {
+                                <span class="btn-spinner"></span>
+                                <span>Creating account...</span>
+                            }
+                            else
+                            {
+                                <span>Create Account</span>
+                            }
+                        </button>
+
+                    </EditForm>
+                }
+
+                <div class="form-footer">
+                    Already have an account? <a href="/login" class="footer-link">Sign in</a>
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+</div>

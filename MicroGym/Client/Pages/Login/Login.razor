@@ -1,0 +1,109 @@
+@page "/login"
+@namespace MicroGym.Client.Pages
+@layout AuthLayout
+
+<PageTitle>Login - MicroGym</PageTitle>
+
+<div class="login-page">
+    <div class="power-stripe"></div>
+    <div class="login-grid">
+
+        <!-- ═══ LEFT: Brand Panel ═══ -->
+        <div class="brand-panel">
+            <div class="brand-glow"></div>
+            <div class="brand-content">
+                <div class="brand-logo">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="52" height="52" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z" />
+                    </svg>
+                </div>
+                <div class="brand-name-block">
+                    <h1 class="brand-name">MICRO<span class="brand-name-accent">GYM</span></h1>
+                    <div class="brand-divider"></div>
+                    <p class="brand-tagline">TRAIN HARD. TRACK RESULTS.</p>
+                </div>
+                <p class="brand-sub">Your complete gym management platform — built for serious fitness.</p>
+                <div class="brand-features">
+                    <div class="feature-item"><span class="feature-icon">▸</span><span>Track workouts &amp; performance</span></div>
+                    <div class="feature-item"><span class="feature-icon">▸</span><span>Monitor member progress</span></div>
+                    <div class="feature-item"><span class="feature-icon">▸</span><span>Manage gym operations</span></div>
+                </div>
+            </div>
+            <div class="brand-footer">&copy; @DateTime.Now.Year MicroGym. All rights reserved.</div>
+        </div>
+
+        <!-- ═══ RIGHT: Form Panel ═══ -->
+        <div class="form-panel">
+            <div class="form-container">
+
+                <!-- Mobile logo -->
+                <div class="mobile-brand">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z" />
+                    </svg>
+                    MICRO<span>GYM</span>
+                </div>
+
+                <div class="form-header">
+                    <h2>Welcome Back</h2>
+                    <p>Sign in to your account to continue</p>
+                </div>
+
+                <!-- Error Alert -->
+                @if (!string.IsNullOrEmpty(errorMessage))
+                {
+                    <div class="ant-alert ant-alert-error ant-alert-with-icon gym-alert">
+                        <span class="ant-alert-icon">⚠</span>
+                        <span class="ant-alert-message">@errorMessage</span>
+                    </div>
+                }
+
+                <!-- Form -->
+                <EditForm Model="loginModel" OnValidSubmit="HandleLogin">
+                    <DataAnnotationsValidator />
+
+                    <div class="ant-form-item gym-form-item">
+                        <label class="gym-label">Email Address</label>
+                        <input class="ant-input ant-input-lg gym-input"
+                               type="email"
+                               placeholder="you@example.com"
+                               @bind="loginModel.Email"
+                               @bind:event="oninput" />
+                        <ValidationMessage For="@(() => loginModel.Email)" class="ant-form-item-explain-error" />
+                    </div>
+
+                    <div class="ant-form-item gym-form-item">
+                        <label class="gym-label">Password</label>
+                        <input class="ant-input ant-input-lg gym-input"
+                               type="password"
+                               placeholder="Enter your password"
+                               @bind="loginModel.Password"
+                               @bind:event="oninput" />
+                        <ValidationMessage For="@(() => loginModel.Password)" class="ant-form-item-explain-error" />
+                    </div>
+
+                    <button type="submit"
+                            class="ant-btn ant-btn-primary ant-btn-lg ant-btn-block gym-btn-primary"
+                            disabled="@isLoading">
+                        @if (isLoading)
+                        {
+                            <span class="btn-spinner"></span>
+                            <span>Signing in...</span>
+                        }
+                        else
+                        {
+                            <span>Sign In</span>
+                        }
+                    </button>
+
+                </EditForm>
+
+                <div class="form-footer">
+                    Don't have an account? <a href="/register" class="footer-link">Create one</a>
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+</div>

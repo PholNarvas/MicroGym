@@ -1,0 +1,133 @@
+@page "/member-dashboard"
+@namespace MicroGym.Client.Pages
+@attribute [Authorize]
+@layout MainLayout
+
+<PageTitle>Members - MicroGym</PageTitle>
+
+<div class="dashboard">
+
+    <!-- ═══ Header ═══ -->
+    <div class="dash-header">
+        <div>
+            <h1 class="dash-title">Member Dashboard</h1>
+            <p class="dash-sub">Manage and monitor all gym members</p>
+        </div>
+    </div>
+
+    <!-- ═══ Stats Cards ═══ -->
+    <div class="stats-row">
+
+        <div class="ant-card gym-stat-card">
+            <div class="ant-card-body">
+                <div class="ant-statistic">
+                    <div class="ant-statistic-title">Total Members</div>
+                    <div class="ant-statistic-content">
+                        <span class="ant-statistic-content-value">@totalMembers</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="ant-card gym-stat-card">
+            <div class="ant-card-body">
+                <div class="ant-statistic">
+                    <div class="ant-statistic-title">Active</div>
+                    <div class="ant-statistic-content">
+                        <span class="ant-statistic-content-value stat-green">@activeMembers</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="ant-card gym-stat-card">
+            <div class="ant-card-body">
+                <div class="ant-statistic">
+                    <div class="ant-statistic-title">Inactive</div>
+                    <div class="ant-statistic-content">
+                        <span class="ant-statistic-content-value stat-red">@inactiveMembers</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- ═══ Toolbar: Search + Filter ═══ -->
+    <div class="toolbar">
+        <span class="ant-input-affix-wrapper ant-input-affix-wrapper-lg gym-input search-input">
+            <span class="ant-input-prefix">🔍</span>
+            <input class="ant-input"
+                   type="text"
+                   placeholder="Search by name or email..."
+                   value="@searchText"
+                   @oninput="OnSearchInput" />
+        </span>
+
+        <select class="gym-select" value="@statusFilter" @onchange="OnStatusChange">
+            <option value="">All Status</option>
+            <option value="Active">Active</option>
+            <option value="Inactive">Inactive</option>
+        </select>
+    </div>
+
+    <!-- ═══ Table ═══ -->
+    <div class="ant-card gym-table-card">
+        <div class="ant-card-body" style="padding: 0;">
+
+            @if (isLoading)
+            {
+                <div class="table-state">
+                    <div class="loader"></div>
+                    <span>Loading members...</span>
+                </div>
+            }
+            else if (!filteredMembers.Any())
+            {
+                <div class="table-state">
+                    <span style="font-size: 2rem; opacity: 0.3;">📋</span>
+                    <span>No members found.</span>
+                </div>
+            }
+            else
+            {
+                <div class="ant-table-wrapper">
+                    <table class="ant-table gym-table">
+                        <thead class="ant-table-thead">
+                            <tr>
+                                <th class="ant-table-cell">Name</th>
+                                <th class="ant-table-cell">Email</th>
+                                <th class="ant-table-cell">Phone</th>
+                                <th class="ant-table-cell">Date Joined</th>
+                                <th class="ant-table-cell">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody class="ant-table-tbody">
+                            @foreach (var member in filteredMembers)
+                            {
+                                <tr class="ant-table-row ant-table-row-level-0">
+                                    <td class="ant-table-cell cell-name">@member.FirstName @member.LastName</td>
+                                    <td class="ant-table-cell cell-muted">@member.Email</td>
+                                    <td class="ant-table-cell cell-muted">@member.Phone</td>
+                                    <td class="ant-table-cell cell-muted">@member.DateJoined.ToString("MMM dd, yyyy")</td>
+                                    <td class="ant-table-cell">
+                                        @if (member.Status == "Active")
+                                        {
+                                            <span class="ant-tag ant-tag-green">Active</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="ant-tag ant-tag-red">Inactive</span>
+                                        }
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+
+        </div>
+    </div>
+
+</div>
