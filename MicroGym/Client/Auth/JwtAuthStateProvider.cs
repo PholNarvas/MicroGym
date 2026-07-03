@@ -8,6 +8,7 @@ namespace MicroGym.Client.Auth
     public class JwtAuthStateProvider : AuthenticationStateProvider
     {
         private readonly IJSRuntime jsRuntime;
+
         private const string TokenKey = "authToken";
 
         public JwtAuthStateProvider(IJSRuntime jsRuntime)
@@ -20,9 +21,9 @@ namespace MicroGym.Client.Auth
             var token = await jsRuntime.InvokeAsync<string?>("localStorage.getItem", TokenKey);
 
             if (string.IsNullOrEmpty(token))
-                return new AuthenticationState(new ClaimsPrincipal(new ClaimsIdentity()));
+                return Unauthenticated();
 
-            var claims = ParseClaimsFromJwt(token);
+            var claims  = ParseClaimsFromJwt(token);
             var identity = new ClaimsIdentity(claims, "jwt");
             return new AuthenticationState(new ClaimsPrincipal(identity));
         }
@@ -30,9 +31,10 @@ namespace MicroGym.Client.Auth
         public async Task NotifyUserLoginAsync(string token)
         {
             await jsRuntime.InvokeVoidAsync("localStorage.setItem", TokenKey, token);
-            var claims = ParseClaimsFromJwt(token);
+
+            var claims  = ParseClaimsFromJwt(token);
             var identity = new ClaimsIdentity(claims, "jwt");
-            var user = new ClaimsPrincipal(identity);
+            var user    = new ClaimsPrincipal(identity);
             NotifyAuthenticationStateChanged(Task.FromResult(new AuthenticationState(user)));
         }
 
@@ -48,9 +50,12 @@ namespace MicroGym.Client.Auth
             return await jsRuntime.InvokeAsync<string?>("localStorage.getItem", TokenKey);
         }
 
+        private static AuthenticationState Unauthenticated()
+            => new AuthenticationState(new ClaimsPrincipal(new ClaimsIdentity()));
+
         private static IEnumerable<Claim> ParseClaimsFromJwt(string token)
         {
-            var handler = new JwtSecurityTokenHandler();
+            var handler  = new JwtSecurityTokenHandler();
             var jwtToken = handler.ReadJwtToken(token);
             return jwtToken.Claims;
         }

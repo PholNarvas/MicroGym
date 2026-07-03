@@ -1,0 +1,116 @@
+@using MicroGym.Client.Service
+@using MicroGym.Client.Services
+@using MicroGym.Shared.DTOs
+@using MicroGym.Shared.Model
+
+<GymModal IsOpen="IsOpen"
+          Title="Edit Member"
+          Subtitle="@($"{model.FirstName} {model.LastName}")"
+          OnClose="HandleClose">
+
+    @if (isLoadingMember)
+    {
+        <div class="table-state"><div class="loader"></div></div>
+    }
+    else if (editSuccess)
+    {
+        <div class="ant-alert ant-alert-success ant-alert-with-icon gym-alert">
+            <span class="ant-alert-icon">✓</span>
+            <div class="ant-alert-content">
+                <span class="ant-alert-message">Member updated successfully!</span>
+            </div>
+        </div>
+        <button class="ant-btn ant-btn-primary gym-btn-primary" style="margin-top:1rem;width:100%;"
+                @onclick="HandleClose">Close</button>
+    }
+    else
+    {
+        @if (!string.IsNullOrEmpty(errorMessage))
+        {
+            <div class="ant-alert ant-alert-error ant-alert-with-icon gym-alert">
+                <span class="ant-alert-icon">⚠</span>
+                <span class="ant-alert-message">@errorMessage</span>
+            </div>
+        }
+
+        <EditForm Model="model" OnValidSubmit="HandleSubmit">
+            <DataAnnotationsValidator />
+
+            <div class="form-row-2col">
+                <div class="ant-form-item gym-form-item">
+                    <label class="gym-label">First Name</label>
+                    <input class="ant-input gym-input" type="text" placeholder="Enter first name"
+                           autocomplete="off"
+                           @bind="model.FirstName" @bind:event="oninput" />
+                    <ValidationMessage For="@(() => model.FirstName)" class="ant-form-item-explain-error" />
+                </div>
+                <div class="ant-form-item gym-form-item">
+                    <label class="gym-label">Last Name</label>
+                    <input class="ant-input gym-input" type="text" placeholder="Enter last name"
+                           autocomplete="off"
+                           @bind="model.LastName" @bind:event="oninput" />
+                    <ValidationMessage For="@(() => model.LastName)" class="ant-form-item-explain-error" />
+                </div>
+            </div>
+
+            <div class="form-row-2col">
+                <div class="ant-form-item gym-form-item">
+                    <label class="gym-label">Email Address</label>
+                    <input class="ant-input gym-input" type="email" placeholder="you@example.com"
+                           autocomplete="off"
+                           @bind="model.Email" @bind:event="oninput" />
+                    <ValidationMessage For="@(() => model.Email)" class="ant-form-item-explain-error" />
+                </div>
+                <div class="ant-form-item gym-form-item">
+                    <label class="gym-label">Phone <span style="font-weight:400;opacity:.6;">(optional)</span></label>
+                    <input class="ant-input gym-input" type="tel" placeholder="+63 900 000 0000"
+                           autocomplete="off"
+                           @bind="model.Phone" @bind:event="oninput" />
+                </div>
+            </div>
+
+            <div class="ant-form-item gym-form-item">
+                <label class="gym-label">Membership Plan</label>
+                <select class="ant-input gym-input gym-select"
+                        value="@model.MemberShipTypeID"
+                        @onchange="OnMembershipTypeChanged">
+                    <option value="0">-- Select a plan --</option>
+                    @foreach (var mt in membershipTypes)
+                    {
+                        <option value="@mt.MembershipTypeID">
+                            @mt.Name@(mt.SubscriptionType != null ? $" — {mt.SubscriptionType}" : "") (₱@mt.Price.ToString("N0"))
+                        </option>
+                    }
+                </select>
+                <ValidationMessage For="@(() => model.MemberShipTypeID)" class="ant-form-item-explain-error" />
+            </div>
+
+            <div class="gym-modal-section-label">Membership Status</div>
+            <div class="form-row-2col">
+                <div class="ant-form-item gym-form-item">
+                    <label class="gym-label">Status</label>
+                    <select class="ant-input gym-input gym-select" @bind="editIsActiveString">
+                        <option value="true">Active</option>
+                        <option value="false">Inactive</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="gym-modal-footer">
+                <button type="button" class="ant-btn" @onclick="HandleClose">Cancel</button>
+                <button type="submit" class="ant-btn ant-btn-primary gym-btn-primary" disabled="@isEditing">
+                    @if (isEditing)
+                    {
+                        <span class="btn-spinner"></span>
+                        <span>Saving...</span>
+                    }
+                    else
+                    {
+                        <span>Save Changes</span>
+                    }
+                </button>
+            </div>
+        </EditForm>
+    }
+
+</GymModal>

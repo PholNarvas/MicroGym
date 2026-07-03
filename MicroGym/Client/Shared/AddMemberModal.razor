@@ -1,0 +1,158 @@
+@using MicroGym.Client.Service
+@using MicroGym.Client.Services
+@using MicroGym.Shared.DTOs
+@using MicroGym.Shared.Model
+
+<GymModal IsOpen="IsOpen"
+          Title="Add New Member"
+          OnClose="HandleClose">
+
+    @if (addSuccess)
+    {
+        <div class="ant-alert ant-alert-success ant-alert-with-icon gym-alert">
+            <span class="ant-alert-icon">✓</span>
+            <div class="ant-alert-content">
+                <span class="ant-alert-message">Member added successfully!</span>
+            </div>
+        </div>
+        <button class="ant-btn ant-btn-primary gym-btn-primary" style="margin-top:1rem;width:100%;"
+                @onclick="HandleClose">Close</button>
+    }
+    else
+    {
+        @if (!string.IsNullOrEmpty(errorMessage))
+        {
+            <div class="ant-alert ant-alert-error ant-alert-with-icon gym-alert">
+                <span class="ant-alert-icon">⚠</span>
+                <span class="ant-alert-message">@errorMessage</span>
+            </div>
+        }
+
+        <EditForm Model="model" OnValidSubmit="HandleSubmit">
+            <DataAnnotationsValidator />
+
+            <div class="form-row-2col">
+                <div class="ant-form-item gym-form-item">
+                    <label class="gym-label">First Name</label>
+                    <input class="ant-input gym-input" type="text" placeholder="Enter first name"
+                           autocomplete="off"
+                           @bind="model.FirstName" @bind:event="oninput" />
+                    <ValidationMessage For="@(() => model.FirstName)" class="ant-form-item-explain-error" />
+                </div>
+                <div class="ant-form-item gym-form-item">
+                    <label class="gym-label">Last Name</label>
+                    <input class="ant-input gym-input" type="text" placeholder="Enter last name"
+                           autocomplete="off"
+                           @bind="model.LastName" @bind:event="oninput" />
+                    <ValidationMessage For="@(() => model.LastName)" class="ant-form-item-explain-error" />
+                </div>
+            </div>
+
+            <div class="form-row-2col">
+                <div class="ant-form-item gym-form-item">
+                    <label class="gym-label">Email Address</label>
+                    <input class="ant-input gym-input" type="email" placeholder="you@example.com"
+                           autocomplete="off"
+                           @bind="model.Email" @bind:event="oninput" />
+                    <ValidationMessage For="@(() => model.Email)" class="ant-form-item-explain-error" />
+                </div>
+                <div class="ant-form-item gym-form-item">
+                    <label class="gym-label">Phone <span style="font-weight:400;opacity:.6;">(optional)</span></label>
+                    <input class="ant-input gym-input" type="tel" placeholder="+63 900 000 0000"
+                           autocomplete="off"
+                           @bind="model.Phone" @bind:event="oninput" />
+                </div>
+            </div>
+
+            <div class="ant-form-item gym-form-item">
+                <label class="gym-label">Membership Plan</label>
+                <select class="ant-input gym-input gym-select"
+                        value="@model.MemberShipTypeID"
+                        @onchange="OnMembershipTypeChanged">
+                    <option value="0">-- Select a plan --</option>
+                    @foreach (var mt in membershipTypes)
+                    {
+                        var displayPrice = isAnnualSelected && annualTier is not null
+                            ? Math.Round(mt.Price * (1 - annualTier.DiscountPct / 100), 2)
+                            : mt.Price;
+                        <option value="@mt.MembershipTypeID">
+                            @mt.Name@(mt.SubscriptionType != null ? $" — {mt.SubscriptionType}" : "")
+                            (₱@displayPrice.ToString("N0")@(isAnnualSelected ? " ⭐" : ""))
+                        </option>
+                    }
+                </select>
+                <ValidationMessage For="@(() => model.MemberShipTypeID)" class="ant-form-item-explain-error" />
+            </div>
+
+            <!-- ═══ Annual Membership Toggle ═══ -->
+            @if (annualTier is not null)
+            {
+                <div class="annual-toggle-card @(isAnnualSelected ? "annual-toggle-card--active" : "")">
+                    <div class="annual-toggle-left">
+                        <span class="annual-toggle-icon">⭐</span>
+                        <div>
+                            <div class="annual-toggle-title">@annualTier.TierName Membership</div>
+                            <div class="annual-toggle-sub">
+                                One-time ₱@annualTier.Fee.ToString("N0") · @annualTier.DiscountPct% off all plans for @annualTier.DurationMonths months
+                            </div>
+                        </div>
+                    </div>
+                    <label class="gym-toggle">
+                        <input type="checkbox"
+                               checked="@isAnnualSelected"
+                               @onchange="OnAnnualToggled" />
+                        <span class="gym-toggle-slider"></span>
+                    </label>
+                </div>
+            }
+
+            <div class="gym-modal-section-label">Payment</div>
+            <div class="form-row-2col">
+                <div class="ant-form-item gym-form-item">
+                    <label class="gym-label">
+                        Amount
+                        @if (isAnnualSelected && annualTier is not null)
+                        {
+                            <span class="gym-modal-section-hint">+ ₱@annualTier.Fee.ToString("N0") tier fee included</span>
+                        }
+                    </label>
+                    <div class="gym-input-prefix-wrap">
+                        <span class="gym-input-prefix">₱</span>
+                        <input class="ant-input gym-input gym-input-with-prefix"
+                               type="number" min="0" step="0.01" placeholder="0.00"
+                               autocomplete="off"
+                               @bind="model.PaymentAmount" @bind:event="oninput" />
+                    </div>
+                    <ValidationMessage For="@(() => model.PaymentAmount)" class="ant-form-item-explain-error" />
+                </div>
+                <div class="ant-form-item gym-form-item">
+                    <label class="gym-label">Payment Method</label>
+                    <select class="ant-input gym-input gym-select" @bind="model.PaymentMethod">
+                        <option value="">-- Select method --</option>
+                        <option value="Cash">💵 Cash</option>
+                        <option value="GCash">📱 GCash</option>
+                        <option value="Maya">📱 Maya</option>
+                        <option value="Card">💳 Card</option>
+                    </select>
+                    <ValidationMessage For="@(() => model.PaymentMethod)" class="ant-form-item-explain-error" />
+                </div>
+            </div>
+
+            <div class="gym-modal-footer">
+                <button type="button" class="ant-btn" @onclick="HandleClose">Cancel</button>
+                <button type="submit" class="ant-btn ant-btn-primary gym-btn-primary" disabled="@isSaving">
+                    @if (isSaving)
+                    {
+                        <span class="btn-spinner"></span>
+                        <span>Saving...</span>
+                    }
+                    else
+                    {
+                        <span>Add Member</span>
+                    }
+                </button>
+            </div>
+        </EditForm>
+    }
+
+</GymModal>

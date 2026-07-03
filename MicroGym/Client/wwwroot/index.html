@@ -6,8 +6,24 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <title>MicroGym</title>
     <base href="/" />
-    <!-- Ant Design v4 CSS -->
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/antd/4.24.16/antd.min.css" rel="stylesheet" />
+    <!-- Apply saved theme immediately — prevents flash of wrong theme on load -->
+    <script>
+        (function () {
+            var t = localStorage.getItem('microgym-theme') || 'dark';
+            document.documentElement.setAttribute('data-theme', t);
+        })();
+
+        window.microgym = window.microgym || {};
+        window.microgym.setTheme = function (theme) {
+            document.documentElement.setAttribute('data-theme', theme);
+            localStorage.setItem('microgym-theme', theme);
+        };
+        window.microgym.getTheme = function () {
+            return localStorage.getItem('microgym-theme') || 'dark';
+        };
+    </script>
+    <!-- Ant Design v4 CSS (local — no internet required) -->
+    <link href="lib/antd.min.css" rel="stylesheet" />
     <link href="css/app.css" rel="stylesheet" />
     <link rel="icon" type="image/png" href="favicon.png" />
     <link href="MicroGym.Client.styles.css" rel="stylesheet" />
@@ -27,7 +43,58 @@
         <a href="" class="reload">Reload</a>
         <a class="dismiss">🗙</a>
     </div>
+    <!-- Track user activity for inactivity timeout -->
+    <script>
+        (function () {
+            var events = ['mousemove', 'mousedown', 'keydown', 'scroll', 'touchstart', 'click'];
+            events.forEach(function (e) {
+                document.addEventListener(e, function () {
+                    localStorage.setItem('lastActivity', Date.now().toString());
+                }, { passive: true });
+            });
+        })();
+    </script>
+
     <script src="_framework/blazor.webassembly.js"></script>
+    <script src="_content/AntDesign/js/ant-design-blazor.js"></script>
+    <!-- Chart.js for Revenue graphs (local — no internet required) -->
+    <script src="lib/chart.umd.min.js"></script>
+    <script>
+        window.microgym.initRevenueChart = function (canvasId, labels, incomeData, expenseData) {
+            var canvas = document.getElementById(canvasId);
+            if (!canvas) return;
+            if (canvas._chartInst) { canvas._chartInst.destroy(); canvas._chartInst = null; }
+            var isDark  = document.documentElement.getAttribute('data-theme') !== 'light';
+            var grid    = isDark ? 'rgba(48,54,61,0.6)'  : 'rgba(208,215,222,0.6)';
+            var tickClr = isDark ? '#8B949E' : '#57606A';
+            canvas._chartInst = new Chart(canvas.getContext('2d'), {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [
+                        { label: 'Income',  data: incomeData,  backgroundColor: 'rgba(34,197,94,0.7)',  borderColor: '#22C55E', borderWidth: 1, borderRadius: 5, borderSkipped: false },
+                        { label: 'Expense', data: expenseData, backgroundColor: 'rgba(248,81,73,0.55)', borderColor: '#F85149', borderWidth: 1, borderRadius: 5, borderSkipped: false }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { labels: { color: tickClr, font: { size: 12, family: "'Segoe UI', system-ui, sans-serif" }, padding: 20 } },
+                        tooltip: {
+                            callbacks: {
+                                label: function(ctx) { return ' ₱' + Number(ctx.raw).toLocaleString('en-PH', { minimumFractionDigits: 2 }); }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: { grid: { color: grid }, ticks: { color: tickClr } },
+                        y: { grid: { color: grid }, ticks: { color: tickClr, callback: function(v) { return '₱' + Number(v).toLocaleString(); } } }
+                    }
+                }
+            });
+        };
+    </script>
 </body>
 
 </html>

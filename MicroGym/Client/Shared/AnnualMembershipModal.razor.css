@@ -1,0 +1,39 @@
+/* ── Annual Membership info card ─────────────────── */
+.annual-info-card {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem 1.25rem;
+    background: rgba(234, 179, 8, 0.08);
+    border: 1px solid rgba(234, 179, 8, 0.25);
+    border-radius: 10px;
+}
+
+.annual-info-icon {
+    font-size: 1.75rem;
+    flex-shrink: 0;
+}
+
+.annual-info-body {
+    flex: 1;
+}
+
+.annual-info-title {
+    font-weight: 600;
+    font-size: 0.95rem;
+    color: var(--text-primary);
+    margin-bottom: 0.2rem;
+}
+
+.annual-info-desc {
+    font-size: 0.82rem;
+    color: var(--text-muted);
+    line-height: 1.5;
+}
+
+.annual-info-price {
+    font-size: 1.35rem;
+    font-weight: 700;
+    color: #EAB308;
+    flex-shrink: 0;
+}

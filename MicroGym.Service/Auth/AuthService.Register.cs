@@ -9,15 +9,33 @@ namespace MicroGym.Service.Auth
         {
             var user = new User
             {
-                Username = request.Username,
+                FirstName = request.FirstName,
+                LastName = request.LastName,
                 Email = request.Email,
+                Phone = request.Phone,
+                MemberShipTypeID = request.MemberShipTypeID,
                 PasswordHash = BCrypt.Net.BCrypt.HashPassword(request.Password),
                 Role = "Member",
-                CreatedAt = DateTime.UtcNow
+                CreatedAt = DateTime.UtcNow,
+                PaymentMethod = request.PaymentMethod,
+                Price = request.PaymentAmount
             };
 
-            var (success, _) = await userRepository.RegisterAsync(user);
-            return success;
+            var (success, newUserId) = await userRepository.RegisterAsync(user);
+
+            if (!success) return false;
+
+            if (request.TierID.HasValue && newUserId > 0)
+            {
+                await memberRepository.PurchaseAnnualMembership(new PurchaseAnnualMembershipDto
+                {
+                    UserId        = newUserId,
+                    TierID        = request.TierID.Value,
+                    PaymentMethod = request.PaymentMethod
+                });
+            }
+
+            return true;
         }
     }
 }

@@ -17,7 +17,7 @@ namespace MicroGym.Service.Auth
             return new LoginResponseDto
             {
                 Token = token,
-                Username = user.Username,
+                FullName = $"{user.FirstName} {user.LastName}",
                 Email = user.Email,
                 Role = user.Role
             };

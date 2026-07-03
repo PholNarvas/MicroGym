@@ -1,0 +1,31 @@
+/* ── Peso prefix on Amount input ─────────────────── */
+.gym-input-prefix-wrap {
+    position: relative;
+    display: flex;
+    align-items: center;
+    width: 100%;
+}
+.gym-input-prefix-wrap .ant-input { width: 100%; }
+.gym-input-prefix {
+    position: absolute;
+    left: 12px;
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    pointer-events: none;
+    z-index: 1;
+}
+.gym-input-with-prefix { padding-left: 28px !important; }
+
+/* Hide number-input spinner arrows */
+.gym-input-with-prefix::-webkit-outer-spin-button,
+.gym-input-with-prefix::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+.gym-input-with-prefix { -moz-appearance: textfield; }
+
+/* ── Section label hint text ─────────────────────── */
+.gym-modal-section-hint {
+    font-weight: 400;
+    color: var(--text-muted);
+    text-transform: none;
+    letter-spacing: 0;
+    font-size: 0.75rem;
+}

@@ -1,0 +1,83 @@
+@using MicroGym.Client.Service
+@using MicroGym.Shared.DTOs
+@using MicroGym.Shared.Model
+
+<GymModal IsOpen="IsOpen"
+          Title="Annual Membership"
+          Subtitle="@MemberName"
+          OnClose="HandleClose">
+
+    @if (purchaseSuccess)
+    {
+        <div class="ant-alert ant-alert-success ant-alert-with-icon gym-alert">
+            <span class="ant-alert-icon">✓</span>
+            <div class="ant-alert-content">
+                <span class="ant-alert-message">Annual Membership activated! Valid for 1 year.</span>
+            </div>
+        </div>
+        <button class="ant-btn ant-btn-primary gym-btn-primary" style="margin-top:1rem;width:100%;"
+                @onclick="HandleClose">Close</button>
+    }
+    else
+    {
+        @if (!string.IsNullOrEmpty(errorMessage))
+        {
+            <div class="ant-alert ant-alert-error ant-alert-with-icon gym-alert">
+                <span class="ant-alert-icon">⚠</span>
+                <span class="ant-alert-message">@errorMessage</span>
+            </div>
+        }
+
+        <!-- Info card -->
+        @if (selectedTier is not null)
+        {
+            <div class="annual-info-card">
+                <div class="annual-info-icon">⭐</div>
+                <div class="annual-info-body">
+                    <div class="annual-info-title">@selectedTier.TierName Membership</div>
+                    <div class="annual-info-desc">
+                        One-time fee of <strong>₱@selectedTier.Fee.ToString("N0")</strong> valid for <strong>@selectedTier.DurationMonths months</strong>.
+                        Unlocks <strong>@selectedTier.DiscountPct%</strong> off all subscription plans.
+                    </div>
+                </div>
+                <div class="annual-info-price">₱@selectedTier.Fee.ToString("N0")</div>
+            </div>
+
+            <EditForm Model="model" OnValidSubmit="HandleSubmit">
+                <DataAnnotationsValidator />
+
+                <div class="ant-form-item gym-form-item" style="margin-top:1.25rem;">
+                    <label class="gym-label">Payment Method</label>
+                    <select class="ant-input gym-input gym-select" @bind="model.PaymentMethod">
+                        <option value="">-- Select method --</option>
+                        <option value="Cash">💵 Cash</option>
+                        <option value="GCash">📱 GCash</option>
+                        <option value="Maya">📱 Maya</option>
+                        <option value="Card">💳 Card</option>
+                    </select>
+                    <ValidationMessage For="@(() => model.PaymentMethod)" class="ant-form-item-explain-error" />
+                </div>
+
+                <div class="gym-modal-footer">
+                    <button type="button" class="ant-btn" @onclick="HandleClose">Cancel</button>
+                    <button type="submit" class="ant-btn ant-btn-primary gym-btn-primary" disabled="@isPurchasing">
+                        @if (isPurchasing)
+                        {
+                            <span class="btn-spinner"></span>
+                            <span>Processing...</span>
+                        }
+                        else
+                        {
+                            <span>Activate — ₱@selectedTier.Fee.ToString("N0")</span>
+                        }
+                    </button>
+                </div>
+            </EditForm>
+        }
+        else
+        {
+            <div class="table-state"><div class="loader"></div><span>Loading tier info...</span></div>
+        }
+    }
+
+</GymModal>

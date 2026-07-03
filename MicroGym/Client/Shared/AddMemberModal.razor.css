@@ -1,0 +1,97 @@
+/* ── Peso prefix on Amount input ─────────────────── */
+.gym-input-prefix-wrap {
+    position: relative;
+    display: flex;
+    align-items: center;
+    width: 100%;
+}
+.gym-input-prefix-wrap .ant-input { width: 100%; }
+.gym-input-prefix {
+    position: absolute;
+    left: 12px;
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    pointer-events: none;
+    z-index: 1;
+}
+.gym-input-with-prefix { padding-left: 28px !important; }
+
+/* Hide number-input spinner arrows */
+.gym-input-with-prefix::-webkit-outer-spin-button,
+.gym-input-with-prefix::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+.gym-input-with-prefix { -moz-appearance: textfield; }
+
+/* Section hint (e.g. "+ ₱500 annual fee included") */
+.gym-modal-section-hint {
+    font-weight: 400;
+    color: #EAB308;
+    font-size: 0.75rem;
+    text-transform: none;
+    margin-left: 6px;
+}
+
+/* ── Annual Membership Toggle Card ───────────────── */
+.annual-toggle-card {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 0.75rem 1rem;
+    margin-bottom: 1rem;
+    border-radius: 10px;
+    border: 1px solid var(--border-default);
+    background: var(--bg-elevated);
+    transition: border-color 0.2s, background 0.2s;
+}
+.annual-toggle-card--active {
+    border-color: rgba(234,179,8,0.4);
+    background: rgba(234,179,8,0.06);
+}
+.annual-toggle-left {
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+}
+.annual-toggle-icon {
+    font-size: 1.2rem;
+    line-height: 1;
+}
+.annual-toggle-title {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+.annual-toggle-sub {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    margin-top: 1px;
+}
+
+/* ── Toggle Switch ───────────────────────────────── */
+.gym-toggle {
+    position: relative;
+    display: inline-block;
+    width: 40px;
+    height: 22px;
+    flex-shrink: 0;
+}
+.gym-toggle input { opacity: 0; width: 0; height: 0; }
+.gym-toggle-slider {
+    position: absolute;
+    cursor: pointer;
+    inset: 0;
+    background: var(--border-default);
+    border-radius: 22px;
+    transition: background 0.2s;
+}
+.gym-toggle-slider::before {
+    content: '';
+    position: absolute;
+    width: 16px; height: 16px;
+    left: 3px; bottom: 3px;
+    background: #fff;
+    border-radius: 50%;
+    transition: transform 0.2s;
+}
+.gym-toggle input:checked + .gym-toggle-slider { background: #EAB308; }
+.gym-toggle input:checked + .gym-toggle-slider::before { transform: translateX(18px); }

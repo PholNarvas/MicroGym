@@ -1,51 +1,138 @@
 @page "/member-dashboard"
 @namespace MicroGym.Client.Pages
+@using BaseApplicationMethods
 @attribute [Authorize]
 @layout MainLayout
+@inherits BaseApplication
 
 <PageTitle>Members - MicroGym</PageTitle>
 
 <div class="dashboard">
 
-    <!-- ═══ Header ═══ -->
+    <!-- Header -->
     <div class="dash-header">
         <div>
             <h1 class="dash-title">Member Dashboard</h1>
             <p class="dash-sub">Manage and monitor all gym members</p>
         </div>
+        <div class="member-action-group">
+            <button class="member-action-btn member-action-btn--existing" @onclick="OpenExistingModal">
+                <div class="member-action-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2" />
+                        <rect x="9" y="3" width="6" height="4" rx="1" />
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6M9 16h4" />
+                    </svg>
+                </div>
+                <div class="member-action-text">
+                    <span class="member-action-label">Add Existing</span>
+                    <span class="member-action-sub">From logbook</span>
+                </div>
+            </button>
+            <button class="member-action-btn member-action-btn--new" @onclick="OpenModal">
+                <div class="member-action-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
+                    </svg>
+                </div>
+                <div class="member-action-text">
+                    <span class="member-action-label">Add New</span>
+                    <span class="member-action-sub">Register member</span>
+                </div>
+            </button>
+        </div>
     </div>
 
-    <!-- ═══ Stats Cards ═══ -->
-    <div class="stats-row">
+    <!-- Stats Cards -->
+    <div class="stats-row member-stats-row">
 
-        <div class="ant-card gym-stat-card">
+        <div class="ant-card gym-stat-card gym-stat-card--total @(statusFilter == "" ? "gym-stat-card--selected" : "")"
+             @onclick='() => OnCardFilter("")'>
             <div class="ant-card-body">
-                <div class="ant-statistic">
-                    <div class="ant-statistic-title">Total Members</div>
-                    <div class="ant-statistic-content">
-                        <span class="ant-statistic-content-value">@totalMembers</span>
+                <div class="stat-card-inner">
+                    <div class="stat-card-info">
+                        <div class="ant-statistic-title">Total Members</div>
+                        <div class="ant-statistic-content">
+                            <span class="ant-statistic-content-value">@totalMembers</span>
+                        </div>
+                    </div>
+                    <div class="stat-card-icon stat-icon--total">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none"
+                             viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                  d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                            <circle cx="9" cy="7" r="4"/>
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                  d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/>
+                        </svg>
                     </div>
                 </div>
             </div>
         </div>
 
-        <div class="ant-card gym-stat-card">
+        <div class="ant-card gym-stat-card gym-stat-card--renewed @(statusFilter == "Renewed" ? "gym-stat-card--selected" : "")"
+             @onclick='() => OnCardFilter("Renewed")'>
             <div class="ant-card-body">
-                <div class="ant-statistic">
-                    <div class="ant-statistic-title">Active</div>
-                    <div class="ant-statistic-content">
-                        <span class="ant-statistic-content-value stat-green">@activeMembers</span>
+                <div class="stat-card-inner">
+                    <div class="stat-card-info">
+                        <div class="ant-statistic-title">Recent Renewals</div>
+                        <div class="ant-statistic-content">
+                            <span class="ant-statistic-content-value stat-blue">@renewedToday</span>
+                        </div>
+                        <div class="stat-sub">@renewedThisWeek renewed this week</div>
+                    </div>
+                    <div class="stat-card-icon stat-icon--renewed">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none"
+                             viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M23 4v6h-6" />
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M1 20v-6h6" />
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15" />
+                        </svg>
                     </div>
                 </div>
             </div>
         </div>
 
-        <div class="ant-card gym-stat-card">
+        <div class="ant-card gym-stat-card gym-stat-card--active @(statusFilter == "Active" ? "gym-stat-card--selected" : "")"
+             @onclick='() => OnCardFilter("Active")'>
             <div class="ant-card-body">
-                <div class="ant-statistic">
-                    <div class="ant-statistic-title">Inactive</div>
-                    <div class="ant-statistic-content">
-                        <span class="ant-statistic-content-value stat-red">@inactiveMembers</span>
+                <div class="stat-card-inner">
+                    <div class="stat-card-info">
+                        <div class="ant-statistic-title">Active</div>
+                        <div class="ant-statistic-content">
+                            <span class="ant-statistic-content-value stat-green">@activeMembers</span>
+                        </div>
+                    </div>
+                    <div class="stat-card-icon stat-icon--active">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none"
+                             viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                            <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+                        </svg>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="ant-card gym-stat-card gym-stat-card--inactive @(statusFilter == "Inactive" ? "gym-stat-card--selected" : "")"
+             @onclick='() => OnCardFilter("Inactive")'>
+            <div class="ant-card-body">
+                <div class="stat-card-inner">
+                    <div class="stat-card-info">
+                        <div class="ant-statistic-title">Expired</div>
+                        <div class="ant-statistic-content">
+                            <span class="ant-statistic-content-value stat-red">@inactiveMembers</span>
+                        </div>
+                    </div>
+                    <div class="stat-card-icon stat-icon--inactive">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none"
+                             viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+                            <line x1="16" y1="2" x2="16" y2="6"/>
+                            <line x1="8" y1="2" x2="8" y2="6"/>
+                            <line x1="3" y1="10" x2="21" y2="10"/>
+                            <line x1="10" y1="14" x2="14" y2="18"/>
+                            <line x1="14" y1="14" x2="10" y2="18"/>
+                        </svg>
                     </div>
                 </div>
             </div>
@@ -53,10 +140,10 @@
 
     </div>
 
-    <!-- ═══ Toolbar: Search + Filter ═══ -->
+    <!-- Toolbar: Search + Sort -->
     <div class="toolbar">
         <span class="ant-input-affix-wrapper ant-input-affix-wrapper-lg gym-input search-input">
-            <span class="ant-input-prefix">🔍</span>
+            <span class="ant-input-prefix">&#128269;</span>
             <input class="ant-input"
                    type="text"
                    placeholder="Search by name or email..."
@@ -64,14 +151,42 @@
                    @oninput="OnSearchInput" />
         </span>
 
-        <select class="gym-select" value="@statusFilter" @onchange="OnStatusChange">
-            <option value="">All Status</option>
-            <option value="Active">Active</option>
-            <option value="Inactive">Inactive</option>
-        </select>
+        <div class="sort-controls">
+            <select class="ant-input sort-select" value="@sortField" @onchange="OnSortFieldChange">
+                <option value="Name">Name</option>
+                <option value="Expiry">Expiry Date</option>
+                <option value="LastVisit">Last Visit</option>
+                <option value="DateJoined">Date Joined</option>
+            </select>
+            <button class="sort-dir-btn" @onclick="OnSortToggle"
+                    title="@(sortAscending ? "Switch to Descending" : "Switch to Ascending")">
+                @if (sortAscending)
+                {
+                    <!-- ASC arrow up -->
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24"
+                         fill="none" stroke="currentColor" stroke-width="2.5"
+                         stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="12" y1="19" x2="12" y2="5"/>
+                        <polyline points="5 12 12 5 19 12"/>
+                    </svg>
+                    <span>ASC</span>
+                }
+                else
+                {
+                    <!-- DESC arrow down -->
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24"
+                         fill="none" stroke="currentColor" stroke-width="2.5"
+                         stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="12" y1="5" x2="12" y2="19"/>
+                        <polyline points="19 12 12 19 5 12"/>
+                    </svg>
+                    <span>DESC</span>
+                }
+            </button>
+        </div>
     </div>
 
-    <!-- ═══ Table ═══ -->
+    <!-- Table -->
     <div class="ant-card gym-table-card">
         <div class="ant-card-body" style="padding: 0;">
 
@@ -85,7 +200,7 @@
             else if (!filteredMembers.Any())
             {
                 <div class="table-state">
-                    <span style="font-size: 2rem; opacity: 0.3;">📋</span>
+                    <span style="font-size: 2rem; opacity: 0.3;">&#128203;</span>
                     <span>No members found.</span>
                 </div>
             }
@@ -95,39 +210,177 @@
                     <table class="ant-table gym-table">
                         <thead class="ant-table-thead">
                             <tr>
-                                <th class="ant-table-cell">Name</th>
-                                <th class="ant-table-cell">Email</th>
+                                <th class="ant-table-cell">Member</th>
                                 <th class="ant-table-cell">Phone</th>
-                                <th class="ant-table-cell">Date Joined</th>
-                                <th class="ant-table-cell">Status</th>
+                                <th class="ant-table-cell">Subscription Plan</th>
+                                <th class="ant-table-cell">Subscription Expiry</th>
+                                <th class="ant-table-cell">Annual Membership</th>
+                                <th class="ant-table-cell">Last Visit</th>
+                                <th class="ant-table-cell">Action</th>
                             </tr>
                         </thead>
                         <tbody class="ant-table-tbody">
-                            @foreach (var member in filteredMembers)
+                            @foreach (var member in pagedMembers)
                             {
-                                <tr class="ant-table-row ant-table-row-level-0">
-                                    <td class="ant-table-cell cell-name">@member.FirstName @member.LastName</td>
-                                    <td class="ant-table-cell cell-muted">@member.Email</td>
-                                    <td class="ant-table-cell cell-muted">@member.Phone</td>
-                                    <td class="ant-table-cell cell-muted">@member.DateJoined.ToString("MMM dd, yyyy")</td>
+                                <tr class="ant-table-row ant-table-row-level-0 gym-row-clickable"
+                                    @onclick="() => OnRowClick(member)">
                                     <td class="ant-table-cell">
-                                        @if (member.Status == "Active")
+                                        <div style="display:flex;align-items:center;gap:0.65rem;">
+                                            <div class="member-avatar-sm">
+                                                @if (!string.IsNullOrEmpty(member.ProfilePicture))
+                                                {
+                                                    <img src="@member.ProfilePicture" alt="" style="width:100%;height:100%;border-radius:50%;object-fit:cover;" />
+                                                }
+                                                else
+                                                {
+                                                    @member.FirstName[0]
+                                                    @member.LastName[0]
+                                                }
+                                            </div>
+                                            <div>
+                                                <div class="cell-name">@member.FirstName @member.LastName</div>
+                                                <div class="cell-muted" style="font-size:0.75rem;">@member.Email</div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="ant-table-cell">
+                                        @if (!string.IsNullOrEmpty(member.Phone))
                                         {
-                                            <span class="ant-tag ant-tag-green">Active</span>
+                                            <span class="cell-muted">@member.Phone</span>
                                         }
                                         else
                                         {
-                                            <span class="ant-tag ant-tag-red">Inactive</span>
+                                            <span class="ant-tag ant-tag-muted">N/A</span>
                                         }
+                                    </td>
+                                 @*    <td class="ant-table-cell cell-muted">@member.CreatedAt.ToString("MMM dd, yyyy")</td> *@
+                                    <td class="ant-table-cell cell-muted">@member.MemberShipType</td> 
+                                    <td class="ant-table-cell">
+                                        <div style="display:flex;flex-direction:column;gap:5px;align-items:flex-start;">
+                                  @*           <span class="cell-muted">@FormatExpiryDate(member.ExpiryDate)</span> *@
+                                            @if (member.ExpiryDate.HasValue)
+                                            {
+                                                var daysLeft = (member.ExpiryDate.Value.Date - DateTime.Today).Days;
+                                                <span class="ant-tag @GetExpiryTagClass(daysLeft)">@GetExpiryTagText(daysLeft)</span>
+                                            }
+                                            else
+                                            {
+                                                <span class="ant-tag ant-tag-muted">N/A</span>
+                                            }
+                                        </div>
+                                    </td>
+                                    <td class="ant-table-cell">
+                                        @{
+                                            var annualLeft = GetAnnualLeft(member);
+                                        }
+                                        <div style="display:flex;flex-direction:column;gap:5px;align-items:flex-start;">
+                                            @if (string.IsNullOrEmpty(annualLeft.css))
+                                            {
+                                                <span class="ant-tag ant-tag-muted">N/A</span>
+                                            }
+                                            else
+                                            {
+                                                @* <span class="cell-muted">@FormatExpiryDate(member.TierExpiryDate)</span> *@
+                                                <span class="ant-tag @annualLeft.css">@annualLeft.text</span>
+                                            }
+                                        </div>
+                                    </td>
+                                    <td class="ant-table-cell cell-muted">@FormatLastVisit(member.LastVisit)</td>
+                                    <td class="ant-table-cell" @onclick:stopPropagation="true">
+                                        <button class="ant-btn gym-icon-btn gym-icon-btn--delete"
+                                                title="Delete member"
+                                                @onclick="@(() => OnDelete(member))">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24"
+                                                 fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                <polyline points="3 6 5 6 21 6" />
+                                                <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" />
+                                                <path d="M10 11v6M14 11v6" />
+                                                <path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2" />
+                                            </svg>
+                                        </button>
                                     </td>
                                 </tr>
                             }
                         </tbody>
                     </table>
+                    <PaginationControls CurrentPage="currentPage"
+                                        TotalPages="totalPages"
+                                        TotalItems="filteredMembers.Count"
+                                        PageSize="PageSize"
+                                        OnPageChanged="OnPageChange" />
                 </div>
             }
 
         </div>
     </div>
 
+
 </div>
+
+<!-- Edit Member Modal -->
+<EditMemberModal UserId="editUserId"
+                 IsOpen="showEditModal"
+                 OnClose="CloseEditModal"
+                 OnMemberUpdated="OnMembersRefreshed" />
+
+<!-- Renew Member Modal -->
+<RenewMemberModal UserId="renewUserId"
+                  MemberName="@renewMemberName"
+                  TierDiscountPct="renewTierDiscountPct"
+                  IsOpen="showRenewModal"
+                  OnClose="CloseRenewModal"
+                  OnMemberRenewed="OnMembersRefreshed" />
+
+<!-- Annual Membership Modal -->
+<AnnualMembershipModal UserId="annualUserId"
+                       MemberName="@annualMemberName"
+                       IsOpen="showAnnualModal"
+                       OnClose="CloseAnnualModal"
+                       OnMemberActivated="OnMembersRefreshed" />
+
+<!-- Delete Confirm Modal -->
+<GymModal IsOpen="showDeleteModal && memberToDelete is not null"
+          Title="Delete Member"
+          MaxWidth="420px"
+          OnClose="CloseDeleteModal">
+
+    <p style="margin:0 0 1.25rem;color:#9CA3AF;">
+        Are you sure you want to delete
+        <strong style="color:#F9FAFB;">@memberToDelete?.FirstName @memberToDelete?.LastName</strong>?
+        This will also remove all their payment records and cannot be undone.
+    </p>
+    <div class="gym-modal-footer">
+        <button class="ant-btn" @onclick="CloseDeleteModal">Cancel</button>
+        <button class="ant-btn gym-btn-danger" @onclick="ConfirmDelete" disabled="@isDeleting">
+            @if (isDeleting)
+            {
+                <span class="btn-spinner"></span>
+                <span>Deleting...</span>
+            }
+            else
+            {
+                <span>&#128465; Delete</span>
+            }
+        </button>
+    </div>
+
+</GymModal>
+
+<!-- Add New Member Modal -->
+<AddMemberModal IsOpen="showAddModal"
+                OnClose="CloseAddModal"
+                OnMemberAdded="OnMembersRefreshed" />
+
+<!-- Add Existing Member Modal -->
+<AddExistingMemberModal IsOpen="showExistingModal"
+                        OnClose="CloseExistingModal"
+                        OnMemberAdded="OnMembersRefreshed" />
+
+<!-- Member Profile Drawer -->
+<MemberProfileDrawer UserId="profileUserId"
+                     IsOpen="showProfileDrawer"
+                     OnClose="CloseProfileDrawer"
+                     OnEditRequested="OnEdit"
+                     OnRenewRequested="OnRenew"
+                     OnAnnualRequested="OnAnnual"
+                     OnDeleteRequested="OnDelete" />

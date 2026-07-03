@@ -1,41 +1,128 @@
-﻿@page
+@page
 @model MicroGym.Server.Pages.ErrorModel
 
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="dark">
 
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-    <title>Error</title>
-    <link href="~/css/bootstrap/bootstrap.min.css" rel="stylesheet" />
-    <link href="~/css/app.css" rel="stylesheet" asp-append-version="true" />
+    <title>Error — MicroGym</title>
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            background: #0D1117;
+            color: #E6EDF3;
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 2rem;
+        }
+
+        .error-card {
+            background: #161B22;
+            border: 1px solid #30363D;
+            border-top: 3px solid #F85149;
+            border-radius: 12px;
+            padding: 2.5rem 2rem;
+            max-width: 520px;
+            width: 100%;
+            box-shadow: 0 16px 48px rgba(0,0,0,0.55);
+        }
+
+        .error-icon {
+            width: 48px;
+            height: 48px;
+            background: rgba(248, 81, 73, 0.12);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 1.25rem;
+        }
+
+        .error-icon svg { color: #F85149; }
+
+        .error-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: #F85149;
+            margin-bottom: 0.4rem;
+        }
+
+        .error-sub {
+            font-size: 0.9rem;
+            color: #8B949E;
+            margin-bottom: 1.5rem;
+            line-height: 1.5;
+        }
+
+        .error-trace {
+            background: #0D1117;
+            border: 1px solid #30363D;
+            border-radius: 6px;
+            padding: 0.75rem 1rem;
+            font-size: 0.75rem;
+            color: #8B949E;
+            margin-bottom: 1.5rem;
+            word-break: break-all;
+        }
+
+        .error-trace span { color: #E6EDF3; font-family: 'Cascadia Code', monospace; }
+
+        .error-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: #22C55E;
+            color: #0D1117;
+            font-weight: 600;
+            font-size: 0.875rem;
+            padding: 8px 20px;
+            border-radius: 8px;
+            text-decoration: none;
+            border: none;
+            cursor: pointer;
+            transition: background 0.15s;
+        }
+
+        .error-btn:hover { background: #16A34A; }
+    </style>
 </head>
 
 <body>
-    <div class="main">
-        <div class="content px-4">
-            <h1 class="text-danger">Error.</h1>
-            <h2 class="text-danger">An error occurred while processing your request.</h2>
-
-            @if (Model.ShowRequestId)
-            {
-                <p>
-                    <strong>Request ID:</strong> <code>@Model.RequestId</code>
-                </p>
-            }
-
-            <h3>Development Mode</h3>
-            <p>
-                Swapping to the <strong>Development</strong> environment displays detailed information about the error that occurred.
-            </p>
-            <p>
-                <strong>The Development environment shouldn't be enabled for deployed applications.</strong>
-                It can result in displaying sensitive information from exceptions to end users.
-                For local debugging, enable the <strong>Development</strong> environment by setting the <strong>ASPNETCORE_ENVIRONMENT</strong> environment variable to <strong>Development</strong>
-                and restarting the app.
-            </p>
+    <div class="error-card">
+        <div class="error-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none"
+                 viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round"
+                      d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+            </svg>
         </div>
+
+        <div class="error-title">Something went wrong</div>
+        <div class="error-sub">
+            An unexpected error occurred while processing your request.
+            Please try again or contact your system administrator if the problem persists.
+        </div>
+
+        @if (Model.ShowRequestId)
+        {
+            <div class="error-trace">
+                Request ID: <span>@Model.RequestId</span>
+            </div>
+        }
+
+        <a href="/" class="error-btn">
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none"
+                 viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M3 12l9-9 9 9M5 10v9a1 1 0 001 1h4v-5h4v5h4a1 1 0 001-1v-9"/>
+            </svg>
+            Go to Dashboard
+        </a>
     </div>
 </body>
 

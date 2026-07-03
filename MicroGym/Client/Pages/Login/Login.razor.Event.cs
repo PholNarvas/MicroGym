@@ -6,19 +6,34 @@ namespace MicroGym.Client.Pages
         {
             isLoading = true;
             errorMessage = string.Empty;
+            loginRes = await AuthClientService.LoginAsync(loginModel);
 
-            var success = await AuthClientService.LoginAsync(loginModel);
+            this.ValidateAccount();
 
-            if (success)
+            if (loginRes != null && loginRes.Role == "Admin")
             {
                 var target = string.IsNullOrEmpty(returnUrl) ? "/" : Uri.UnescapeDataString(returnUrl);
                 NavigationManager.NavigateTo(target);
             }
-            else
+        }
+
+        private void ValidateAccount()
+        {
+            if (loginRes == null)
             {
-                errorMessage = "Invalid email or password.";
+                errorMessage = "No Account Found.";
                 isLoading = false;
+                return;
             }
+
+            if (loginRes.Role != "Admin")
+            {
+                errorMessage = "Access denied. Admins only.";
+                isLoading = false;
+                return;
+            }
+
+            isLoading = false;
         }
     }
 }
