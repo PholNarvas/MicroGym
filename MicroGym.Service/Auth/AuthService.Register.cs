@@ -9,11 +9,16 @@ namespace MicroGym.Service.Auth
         {
             var user = new User
             {
-                Username = request.Username,
+                FirstName = request.FirstName,
+                LastName = request.LastName,
                 Email = request.Email,
+                Phone = request.Phone,
+                MemberShipTypeID = request.MemberShipTypeID,
                 PasswordHash = BCrypt.Net.BCrypt.HashPassword(request.Password),
                 Role = "Member",
-                CreatedAt = DateTime.UtcNow
+                CreatedAt = DateTime.UtcNow,
+                PaymentMethod = request.PaymentMethod,
+                Price = request.PaymentAmount
             };
 
             var (success, _) = await userRepository.RegisterAsync(user);

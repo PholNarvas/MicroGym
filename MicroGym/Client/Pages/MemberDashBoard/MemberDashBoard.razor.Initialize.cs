@@ -5,8 +5,10 @@ namespace MicroGym.Client.Pages
         protected override async Task OnInitializedAsync()
         {
             isLoading = true;
-            allMembers = await MemberService.GetMembersAsync();
+
+            allMembers      = await GetMembers();
             filteredMembers = allMembers;
+
             isLoading = false;
         }
     }

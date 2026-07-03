@@ -1,6 +1,8 @@
 @page "/register"
 @namespace MicroGym.Client.Pages
+@using BaseApplicationMethods
 @layout AuthLayout
+@inherits BaseApplication
 
 <PageTitle>Register - MicroGym</PageTitle>
 
@@ -75,17 +77,30 @@
                     <EditForm Model="registerModel" OnValidSubmit="HandleRegister">
                         <DataAnnotationsValidator />
 
-                        <!-- Row 1: Username + Email -->
+                        <!-- Row 1: First Name + Last Name -->
                         <div class="form-row-2col">
                             <div class="ant-form-item gym-form-item">
-                                <label class="gym-label">Username</label>
+                                <label class="gym-label">First Name</label>
                                 <input class="ant-input ant-input-lg gym-input"
                                        type="text"
-                                       placeholder="Enter username"
-                                       @bind="registerModel.Username"
+                                       placeholder="Enter first name"
+                                       @bind="registerModel.FirstName"
                                        @bind:event="oninput" />
-                                <ValidationMessage For="@(() => registerModel.Username)" class="ant-form-item-explain-error" />
+                                <ValidationMessage For="@(() => registerModel.FirstName)" class="ant-form-item-explain-error" />
                             </div>
+                            <div class="ant-form-item gym-form-item">
+                                <label class="gym-label">Last Name</label>
+                                <input class="ant-input ant-input-lg gym-input"
+                                       type="text"
+                                       placeholder="Enter last name"
+                                       @bind="registerModel.LastName"
+                                       @bind:event="oninput" />
+                                <ValidationMessage For="@(() => registerModel.LastName)" class="ant-form-item-explain-error" />
+                            </div>
+                        </div>
+
+                        <!-- Row 2: Email + Phone -->
+                        <div class="form-row-2col">
                             <div class="ant-form-item gym-form-item">
                                 <label class="gym-label">Email Address</label>
                                 <input class="ant-input ant-input-lg gym-input"
@@ -95,9 +110,32 @@
                                        @bind:event="oninput" />
                                 <ValidationMessage For="@(() => registerModel.Email)" class="ant-form-item-explain-error" />
                             </div>
+                            <div class="ant-form-item gym-form-item">
+                                <label class="gym-label">Phone <span style="font-weight:400; opacity:.6;">(optional)</span></label>
+                                <input class="ant-input ant-input-lg gym-input"
+                                       type="tel"
+                                       placeholder="+63 900 000 0000"
+                                       @bind="registerModel.Phone"
+                                       @bind:event="oninput" />
+                                <ValidationMessage For="@(() => registerModel.Phone)" class="ant-form-item-explain-error" />
+                            </div>
                         </div>
 
-                        <!-- Row 2: Password + Confirm -->
+                        <!-- Row 3: Membership Plan -->
+                        <div class="ant-form-item gym-form-item">
+                            <label class="gym-label">Membership Plan</label>
+                            <select class="ant-input ant-input-lg gym-input gym-select"
+                                    @bind="registerModel.MemberShipTypeID">
+                                <option value="0">-- Select a plan --</option>
+                                <option value="1">Basic Monthly</option>
+                                <option value="2">VIP Quarterly</option>
+                                <option value="3">Annual Elite</option>
+                                <option value="4">Walk-In (1 Day)</option>
+                            </select>
+                            <ValidationMessage For="@(() => registerModel.MemberShipTypeID)" class="ant-form-item-explain-error" />
+                        </div>
+
+                        <!-- Row 4: Password + Confirm -->
                         <div class="form-row-2col">
                             <div class="ant-form-item gym-form-item">
                                 <label class="gym-label">Password</label>

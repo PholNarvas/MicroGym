@@ -25,7 +25,22 @@ builder.Services.AddHttpClient<MemberService>(client =>
     client.BaseAddress = new Uri(builder.HostEnvironment.BaseAddress))
     .AddHttpMessageHandler<JwtAuthorizationMessageHandler>();
 
+builder.Services.AddHttpClient<AttendanceClientService>(client =>
+    client.BaseAddress = new Uri(builder.HostEnvironment.BaseAddress))
+    .AddHttpMessageHandler<JwtAuthorizationMessageHandler>();
+
+builder.Services.AddHttpClient<MembershipTypeClientService>(client =>
+    client.BaseAddress = new Uri(builder.HostEnvironment.BaseAddress))
+    .AddHttpMessageHandler<JwtAuthorizationMessageHandler>();
+
+// AntDesign
+builder.Services.AddAntDesign();
+
 // Client Services
 builder.Services.AddScoped<AuthClientService>();
+builder.Services.AddScoped<RevenueService>();
+builder.Services.AddScoped<PaymentClientService>();
+builder.Services.AddScoped<MicroGym.Client.Services.ModalService>();
+builder.Services.AddSingleton<MicroGym.Client.Services.ThemeService>();
 
 await builder.Build().RunAsync();

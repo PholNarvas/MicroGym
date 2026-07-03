@@ -1,0 +1,126 @@
+@page "/admin-revenue"
+@using BaseApplicationMethods
+@attribute [Authorize]
+@layout MainLayout
+@inherits BaseApplication
+
+<PageTitle>Revenue - MicroGym</PageTitle>
+
+<div class="dashboard">
+
+    <!-- ═══ Header ═══ -->
+    <div class="dash-header">
+        <div>
+            <h1 class="dash-title">Revenue</h1>
+            <p class="dash-sub">Track gym earnings, income, and expenses</p>
+        </div>
+
+        <!-- Month / Year Filter -->
+        <div class="rev-filter">
+            <select class="gym-select" value="@selectedMonth" @onchange="OnMonthChange">
+                <option value="1">January</option>
+                <option value="2">February</option>
+                <option value="3">March</option>
+                <option value="4">April</option>
+                <option value="5">May</option>
+                <option value="6">June</option>
+                <option value="7">July</option>
+                <option value="8">August</option>
+                <option value="9">September</option>
+                <option value="10">October</option>
+                <option value="11">November</option>
+                <option value="12">December</option>
+            </select>
+            <select class="gym-select" value="@selectedYear" @onchange="OnYearChange">
+                @foreach (var y in availableYears)
+                {
+                    <option value="@y">@y</option>
+                }
+            </select>
+        </div>
+    </div>
+
+    <!-- ═══ KPI Stat Cards ═══ -->
+    @if (isLoading)
+    {
+        <div class="stats-row">
+            <div class="kpi-card kpi-loading"><div class="loader"></div></div>
+            <div class="kpi-card kpi-loading"><div class="loader"></div></div>
+            <div class="kpi-card kpi-loading"><div class="loader"></div></div>
+        </div>
+    }
+    else
+    {
+        <div class="stats-row">
+
+            <!-- Total Earnings -->
+            <div class="kpi-card">
+                <div class="kpi-icon kpi-icon-gold">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    </svg>
+                </div>
+                <div class="kpi-body">
+                    <div class="kpi-label">Total Earnings</div>
+                    <div class="kpi-value kpi-gold" style="font-size:1.5rem;">₱@totalEarnings.ToString("N2")</div>
+                    <div class="kpi-sub">All-time revenue</div>
+                </div>
+            </div>
+
+            <!-- Monthly Income -->
+            <div class="kpi-card">
+                <div class="kpi-icon kpi-icon-green">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M7 11l5-5m0 0l5 5m-5-5v12"/>
+                    </svg>
+                </div>
+                <div class="kpi-body">
+                    <div class="kpi-label">Monthly Income</div>
+                    <div class="kpi-value kpi-green" style="font-size:1.5rem;">₱@monthlyIncome.ToString("N2")</div>
+                    <div class="kpi-sub">@selectedMonthLabel @selectedYear</div>
+                </div>
+            </div>
+
+            <!-- Monthly Expense -->
+            <div class="kpi-card">
+                <div class="kpi-icon kpi-icon-red">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M17 13l-5 5m0 0l-5-5m5 5V6"/>
+                    </svg>
+                </div>
+                <div class="kpi-body">
+                    <div class="kpi-label">Monthly Expense</div>
+                    <div class="kpi-value kpi-red" style="font-size:1.5rem;">₱@monthlyExpense.ToString("N2")</div>
+                    <div class="kpi-sub">@selectedMonthLabel @selectedYear</div>
+                </div>
+            </div>
+
+        </div>
+    }
+
+    <!-- ═══ Revenue Chart ═══ -->
+    <div class="ant-card rev-chart-card" style="margin-bottom:1.5rem;">
+        <div class="ant-card-body rev-chart-header">
+            <div>
+                <p class="rev-chart-title">Monthly Revenue Overview — @selectedYear</p>
+                <p class="rev-chart-sub">Income vs Expense across all 12 months</p>
+            </div>
+        </div>
+        <div class="ant-card-body rev-chart-body">
+            @if (chartLoading)
+            {
+                <div class="rev-chart-loading">
+                    <div class="loader"></div>
+                    <span>Loading chart data...</span>
+                </div>
+            }
+            else
+            {
+                <div class="rev-chart-wrap">
+                    <canvas id="revenue-chart"></canvas>
+                </div>
+            }
+        </div>
+    </div>
+
+</div>

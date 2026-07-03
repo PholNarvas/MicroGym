@@ -1,0 +1,335 @@
+@page "/admin-attendance"
+@using AntDesign
+@using BaseApplicationMethods
+@using MicroGym.Shared.Model
+
+@attribute [Authorize]
+@layout MainLayout
+@inherits BaseApplication
+
+<PageTitle>Attendance - MicroGym</PageTitle>
+
+<div class="dashboard">
+
+    <!-- ═══ Header ═══ -->
+    <div class="dash-header">
+        <div>
+            <h1 class="dash-title">Attendance</h1>
+            <p class="dash-sub">@DateTime.Now.ToString("dddd, MMMM dd, yyyy")</p>
+        </div>
+        <button class="attn-add-btn" @onclick="OpenAddModal">
+            <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15"
+                 fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/>
+            </svg>
+            Add Check-in
+        </button>
+    </div>
+
+    <!-- ═══ KPI Stats ═══ -->
+    <div class="stats-row attn-stats-row" style="grid-template-columns:repeat(4,1fr);">
+
+        <div class="kpi-card">
+            <div class="kpi-icon kpi-icon-green">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/>
+                </svg>
+            </div>
+            <div class="kpi-body">
+                <div class="kpi-label">Total Check-ins</div>
+                <div class="kpi-value kpi-green">@todayAttendance.Count</div>
+                <div class="kpi-sub">Members today</div>
+            </div>
+        </div>
+
+        <div class="kpi-card">
+            <div class="kpi-icon kpi-icon-red">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M15.59 14.37a6 6 0 01-5.84 7.38v-4.82m5.84-2.56a14.98 14.98 0 006.16-12.12A14.98 14.98 0 009.631 8.41m5.96 5.96a14.926 14.926 0 01-5.841 2.58m-.119-8.54a6 6 0 00-7.381 5.84h4.82m2.56-5.84a14.927 14.927 0 00-2.58 5.84m2.699 2.7c-.103.021-.207.041-.311.06a15.09 15.09 0 01-2.448-2.448 14.9 14.9 0 01.06-.312m-2.24 2.39a4.493 4.493 0 00-1.757 4.306 4.493 4.493 0 004.306-1.758M16.5 9a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0z"/>
+                </svg>
+            </div>
+            <div class="kpi-body">
+                <div class="kpi-label">Boxing / TaekWondo</div>
+                <div class="kpi-value kpi-red">@todayAttendance.Count(a => a.Name == "Boxing/TaekWondo")</div>
+                <div class="kpi-sub">Check-ins today</div>
+            </div>
+        </div>
+
+        <div class="kpi-card">
+            <div class="kpi-icon kpi-icon-green">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M6.429 9.75L2.25 12l4.179 2.25m0-4.5l5.571 3 5.571-3m-11.142 0L2.25 7.5 12 2.25l9.75 5.25-4.179 2.25m0 0L21.75 12l-4.179 2.25m0 0l4.179 2.25L12 21.75 2.25 16.5l4.179-2.25m11.142 0l-5.571 3-5.571-3"/>
+                </svg>
+            </div>
+            <div class="kpi-body">
+                <div class="kpi-label">Gym Members</div>
+                <div class="kpi-value kpi-green">@todayAttendance.Count(a => a.Name == "Gym")</div>
+                <div class="kpi-sub">Check-ins today</div>
+            </div>
+        </div>
+
+        <div class="kpi-card">
+            <div class="kpi-icon kpi-icon-purple">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 9l10.5-3m0 6.553v3.75a2.25 2.25 0 01-1.632 2.163l-1.32.377a1.803 1.803 0 11-.99-3.467l2.31-.66a2.25 2.25 0 001.632-2.163zm0 0V2.25L9 5.25v10.303m0 0v3.75a2.25 2.25 0 01-1.632 2.163l-1.32.377a1.803 1.803 0 01-.99-3.467l2.31-.66A2.25 2.25 0 009 15.553z"/>
+                </svg>
+            </div>
+            <div class="kpi-body">
+                <div class="kpi-label">Zumba</div>
+                <div class="kpi-value kpi-purple">@todayAttendance.Count(a => a.Name == "Zumba")</div>
+                <div class="kpi-sub">Check-ins today</div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- ═══ Check-in Search ═══ -->
+    <div class="ant-card gym-table-card attn-checkin-card">
+        <div class="ant-card-body attn-checkin-body">
+
+            <div class="attn-search-label">Check In a Member</div>
+
+            <div class="toolbar attn-toolbar">
+                <span class="ant-input-affix-wrapper ant-input-affix-wrapper-lg gym-input search-input">
+                    <span class="ant-input-prefix">🔍</span>
+                    <input class="ant-input"
+                           type="text"
+                           placeholder="Search member by name..."
+                           value="@searchText"
+                           @oninput="OnSearchInput" />
+                </span>
+                @if (!string.IsNullOrWhiteSpace(searchText))
+                {
+                    <button class="ant-btn attn-clear-btn" @onclick="ClearSearch">✕ Clear</button>
+                }
+            </div>
+
+            <!-- Search Results -->
+            @if (searchResults.Any())
+            {
+                <div class="attn-search-results">
+                    @foreach (var member in searchResults)
+                    {
+                        var alreadyIn = todayAttendance.Any(a => a.UserID == member.UserId);
+                        <div class="attn-result-row">
+                            <div class="attn-result-info">
+                                <span class="cell-name">@member.FirstName @member.LastName</span>
+                                <span class="cell-muted attn-result-email">@member.Email</span>
+                            </div>
+                            <div class="attn-result-action">
+                                @if (alreadyIn)
+                                {
+                                    <span class="ant-tag ant-tag-green">Already Checked In</span>
+                                }
+                                else if (!IsMembershipValid(member.UserId))
+                                {
+                                    <button class="ant-btn gym-btn-expired"
+                                            @onclick="() => OnExpiredClick(member)">
+                                        ⚠ Expired
+                                    </button>
+                                }
+                                else
+                                {
+                                    <button class="ant-btn ant-btn-primary gym-btn-checkin"
+                                            disabled="@isCheckingIn"
+                                            @onclick="() => OnCheckIn(member.UserId)">
+                                        @if (isCheckingIn && checkingInUserId == member.UserId)
+                                        {
+                                            <span class="btn-spinner"></span>
+                                            <span>Checking in...</span>
+                                        }
+                                        else
+                                        {
+                                            <span>✓ Check In</span>
+                                        }
+                                    </button>
+                                }
+                            </div>
+                        </div>
+                    }
+                </div>
+            }
+            else if (!string.IsNullOrWhiteSpace(searchText))
+            {
+                <div class="attn-no-results">No members found.</div>
+            }
+
+            <!-- Error message — success is handled by the popup below -->
+            @if (!string.IsNullOrEmpty(checkInMessage) && !checkInSuccess)
+            {
+                <div class="ant-alert ant-alert-error ant-alert-with-icon gym-alert attn-alert">
+                    <span class="ant-alert-icon">⚠</span>
+                    <span class="ant-alert-message">@checkInMessage</span>
+                </div>
+            }
+
+        </div>
+    </div>
+
+    <!-- ═══ Today's Attendance Log ═══ -->
+    <div class="ant-card gym-table-card">
+        <div class="ant-card-body attn-log-header-body">
+            <span class="dash-title attn-log-title">Today's Attendance Log</span>
+        </div>
+        <div class="ant-card-body attn-log-table-body">
+            @if (isLoading)
+            {
+                <div class="table-state"><div class="loader"></div></div>
+            }
+            else if (!todayAttendance.Any())
+            {
+                <div class="table-state">
+                    <span class="attn-empty-icon">📋</span>
+                    <span>No check-ins yet today.</span>
+                </div>
+            }
+            else
+            {
+                <table class="gym-table attn-table">
+                    <thead>
+                        <tr>
+                            <th class="attn-col-name">Name</th>
+                            <th class="attn-col-type">Membership Type</th>
+                            <th class="attn-col-type">Expiry Date</th>
+                            <th class="attn-col-time">Check-in Time</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var record in todayAttendance)
+                        {
+                            <tr>
+                                <td class="cell-name attn-col-name">@record.FirstName @record.LastName</td>
+                                <td class="cell-muted attn-col-type">@record.Name</td>
+                                <td class="cell-muted attn-col-type">@FormatExpiryDate(record.ExpiryDate)</td>
+                                <td class="cell-muted attn-col-time">@record.CheckInTime.ToString("hh:mm tt")</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            }
+        </div>
+    </div>
+
+</div>
+
+<!-- ═══ Check-in Success Alert ═══ -->
+<GymModal IsOpen="showSuccessAlert"
+          Title="Check-in Successful"
+          MaxWidth="400px"
+          OnClose="CloseSuccessAlert">
+
+    <div style="text-align:center;padding:0.5rem 0 1.25rem;">
+        <div style="font-size:3rem;margin-bottom:1rem;">✅</div>
+        <p style="margin:0 0 0.35rem;font-size:1.1rem;font-weight:700;color:#F9FAFB;">
+            @checkedInMemberName
+        </p>
+        <p style="margin:0;font-size:0.875rem;color:#22C55E;font-weight:600;">
+            Successfully checked in!
+        </p>
+        <p style="margin:0.5rem 0 0;font-size:0.78rem;color:#6B7280;">
+            @DateTime.Now.ToString("hh:mm tt") · @DateTime.Now.ToString("MMMM dd, yyyy")
+        </p>
+    </div>
+
+    <div class="gym-modal-footer">
+        <button class="ant-btn ant-btn-primary gym-btn-primary" @onclick="CloseSuccessAlert">Done</button>
+    </div>
+
+</GymModal>
+
+<!-- ═══ Expired Membership Alert ═══ -->
+<GymModal IsOpen="showExpiredAlert"
+          Title="Membership Expired"
+          MaxWidth="420px"
+          OnClose="CloseExpiredAlert">
+
+    <div style="text-align:center;padding:0.5rem 0 1.25rem;">
+        <div style="font-size:2.5rem;margin-bottom:1rem;">⛔</div>
+        <p style="margin:0 0 0.5rem;font-size:1rem;font-weight:700;color:#F9FAFB;">
+            @expiredMemberName
+        </p>
+        <p style="margin:0;font-size:0.875rem;color:#9CA3AF;">
+            Membership expired on
+            <strong style="color:#EF4444;">
+                @(expiredDate.HasValue ? expiredDate.Value.ToString("MMMM dd, yyyy") : "—")
+            </strong>
+        </p>
+        <p style="margin:0.75rem 0 0;font-size:0.8rem;color:#6B7280;">
+            Please renew their membership before checking in.
+        </p>
+    </div>
+
+    <div class="gym-modal-footer">
+        <button class="ant-btn" @onclick="CloseExpiredAlert">Close</button>
+    </div>
+
+</GymModal>
+
+@* ═══ Member Picker — content passed to AppModal via ModalService ═══ *@
+@code {
+    private RenderFragment MemberPickerContent => __builder =>
+    {
+        <div style="position:relative;margin-bottom:6px;">
+            <input style="width:100%;box-sizing:border-box;background:#1a1a1a;border:1px solid #2a2a2a;border-radius:8px;padding:10px 12px 10px 16px;color:#F1F5F9;font-size:0.875rem;outline:none;"
+                   type="text"
+                   placeholder="🔍  Search by name..."
+                   value="@modalSearchText"
+                   @oninput="OnModalSearchInput" />
+        </div>
+
+        <div style="font-size:0.72rem;color:#4B5563;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:10px;margin-top:4px;">
+            @ModalFilteredMembers.Count member@(ModalFilteredMembers.Count != 1 ? "s" : "")
+        </div>
+
+        <div style="border:1px solid #1f1f1f;border-radius:8px;overflow:hidden;">
+            @if (!ModalFilteredMembers.Any())
+            {
+                <div style="padding:2rem;text-align:center;color:#4B5563;font-size:0.875rem;">No members found.</div>
+            }
+            else
+            {
+                @foreach (var member in ModalFilteredMembers)
+                {
+                    var alreadyIn = todayAttendance.Any(a => a.UserID == member.UserId);
+                    var isExpired = !IsMembershipValid(member.UserId);
+
+                    <div class="modal-member-row @(alreadyIn || isExpired ? "dimmed" : "")">
+                        <div class="modal-member-left">
+                            <div class="modal-member-avatar" style="@(isExpired ? "background:#2d1515;border-color:rgba(239,68,68,0.3);color:#EF4444;" : "")">
+                                @member.FirstName[0]@member.LastName[0]
+                            </div>
+                            <div class="modal-member-info">
+                                <span class="modal-member-name">@member.FirstName @member.LastName</span>
+                                <span class="modal-member-expiry" style="@(isExpired ? "color:#EF4444;" : "")">
+                                    @FormatExpiryDate(member.ExpiryDate)
+                                </span>
+                            </div>
+                        </div>
+                        <div class="modal-member-right">
+                            @if (alreadyIn)
+                            {
+                                <span class="modal-checkedin-badge">✓ Checked In</span>
+                            }
+                            else if (isExpired)
+                            {
+                                <button class="ant-btn gym-btn-expired"
+                                        @onclick="() => OnModalExpiredClick(member)">
+                                    ⚠ Expired
+                                </button>
+                            }
+                            else
+                            {
+                                <Button Class="gym-btn-checkin"
+                                        Disabled="@isCheckingIn"
+                                        Loading="@(isCheckingIn && checkingInUserId == member.UserId)"
+                                        OnClick="() => OnModalCheckIn(member.UserId)">
+                                    ✓ Check In
+                                </Button>
+                            }
+                        </div>
+                    </div>
+                }
+            }
+        </div>
+    };
+}

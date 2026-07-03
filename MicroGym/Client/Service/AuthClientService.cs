@@ -15,16 +15,16 @@ namespace MicroGym.Client.Service
             this.authStateProvider = authStateProvider;
         }
 
-        public async Task<bool> LoginAsync(LoginRequestDto request)
+        public async Task<LoginResponseDto> LoginAsync(LoginRequestDto request)
         {
             var response = await httpClient.PostAsJsonAsync("api/auth/login", request);
-            if (!response.IsSuccessStatusCode) return false;
+            if (!response.IsSuccessStatusCode) return null;
 
             var result = await response.Content.ReadFromJsonAsync<LoginResponseDto>();
-            if (result == null) return false;
+            if (result == null) return null;
 
             await authStateProvider.NotifyUserLoginAsync(result.Token);
-            return true;
+            return result;
         }
 
         public async Task<bool> RegisterAsync(RegisterRequestDto request)
