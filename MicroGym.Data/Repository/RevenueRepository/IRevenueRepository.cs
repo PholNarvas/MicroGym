@@ -4,7 +4,8 @@ namespace MicroGym.Data.Repository.RevenueRepository
 {
     public interface IRevenueRepository
     {
-        Task<List<Payment>> GetRevenue(DateOnly month);
-        Task<Revenue?> GetYearlyRevenue();
+        Task<List<RevenuePaymentDetail>> GetRevenue(DateOnly month);
+        Task<Revenue?>                GetYearlyRevenue();
+        Task<List<RevenueChartMonth>> GetRevenueChartByYear(int year);
     }
 }

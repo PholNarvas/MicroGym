@@ -19,7 +19,15 @@ namespace MicroGym.Client.Auth
             if (!string.IsNullOrEmpty(token))
                 request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
-            return await base.SendAsync(request, cancellationToken);
+            var response = await base.SendAsync(request, cancellationToken);
+
+            // If the server rejects the token, clear the local session immediately.
+            // CascadingAuthenticationState will pick up the state change and
+            // RedirectToLogin (App.razor <NotAuthorized>) handles the navigation.
+            if (response.StatusCode == System.Net.HttpStatusCode.Unauthorized)
+                await authStateProvider.NotifyUserLogoutAsync();
+
+            return response;
         }
     }
 }

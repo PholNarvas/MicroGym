@@ -3,14 +3,19 @@
     <!-- ── Brand ─────────────────────────────────── -->
     <div class="sidebar-brand-wrap">
         <a href="/" class="sidebar-brand-link">
-            <div class="sb-icon">
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none"
-                     viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                    <path stroke-linecap="round" stroke-linejoin="round"
-                          d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z"/>
-                </svg>
+            <!-- Brand text -->
+            <div class="sb-gng-text">
+                <div class="sb-gng-nameline">
+                    <span class="sb-gng-gng">GNG</span>
+                    <span class="sb-gng-fit">FITNESS</span>
+                </div>
+                <div class="sb-gng-tricolor">
+                    <span class="tc-green"></span>
+                    <span class="tc-white"></span>
+                    <span class="tc-red"></span>
+                </div>
+                <div class="sb-gng-est">EST. 2008</div>
             </div>
-            <span class="sb-brand-text">MICRO<span class="sb-brand-accent">GYM</span></span>
         </a>
     </div>
 
@@ -53,7 +58,16 @@
                         <path stroke-linecap="round" stroke-linejoin="round"
                               d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
                     </svg>
-                    <span>Revenue</span>
+                    <span class="sb-link-label">
+                        Revenue
+                        <span class="sb-owner-badge">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" fill="none"
+                                 viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2">
+                                <path stroke-linecap="round" stroke-linejoin="round"
+                                      d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z"/>
+                            </svg>
+                        </span>
+                    </span>
                 </NavLink>
             </Authorized>
         </AuthorizeView>
@@ -120,7 +134,7 @@
             <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"/>
         </svg>
     </button>
-    <span class="mobile-brand">MICRO<span class="sb-brand-accent">GYM</span></span>
+    <span class="mobile-brand">GNG<span class="sb-brand-accent">FITNESS</span></span>
 </div>
 
 @if (!collapseNavMenu)

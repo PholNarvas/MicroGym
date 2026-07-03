@@ -17,69 +17,130 @@
             <h1 class="dash-title">Attendance</h1>
             <p class="dash-sub">@DateTime.Now.ToString("dddd, MMMM dd, yyyy")</p>
         </div>
-        <button class="attn-add-btn" @onclick="OpenAddModal">
-            <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15"
-                 fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/>
-            </svg>
-            Add Check-in
-        </button>
+
     </div>
 
+
+
+    <!-- ═══ Charts Row ═══ -->
+    @if (!isLoading)
+    {
+        <div class="attn-charts-row">
+
+            <!-- Weekly Trend -->
+            <div class="ant-card attn-chart-card">
+                <div class="attn-chart-header">
+                    <div>
+                        <div class="attn-chart-title">Weekly Trend</div>
+                        <div class="attn-chart-sub">Check-ins over the last 7 days</div>
+                    </div>
+                </div>
+                <div class="attn-chart-body">
+                    @if (!weeklyData.Any())
+                    {
+                        <div class="attn-chart-empty">No data yet</div>
+                    }
+                    else
+                    {
+                        <div class="weekly-chart">
+                            @foreach (var day in weeklyData)
+                            {
+                                var isToday = day.Date.Date == DateTime.Today;
+                                var barPct  = WeeklyMax > 0 ? (day.Count * 100 / WeeklyMax) : 0;
+                                var minPct  = day.Count > 0 && barPct < 5 ? 5 : barPct;
+                                <div class="weekly-col @(isToday ? "weekly-col-today" : "")">
+                                    <div class="weekly-count">@(day.Count > 0 ? day.Count.ToString() : "")</div>
+                                    <div class="weekly-bar-wrap">
+                                        <div class="weekly-bar @(isToday ? "weekly-bar-today" : "")"
+                                             style="height: @minPct%;"></div>
+                                    </div>
+                                    <div class="weekly-day">@day.Date.ToString("ddd")</div>
+                                    <div class="weekly-date">@day.Date.ToString("M/d")</div>
+                                </div>
+                            }
+                        </div>
+                    }
+                </div>
+            </div>
+
+            <!-- Peak Hours -->
+            <div class="ant-card attn-chart-card">
+                <div class="attn-chart-header">
+                    <div>
+                        <div class="attn-chart-title">Peak Hours</div>
+                        <div class="attn-chart-sub">
+                            @(IsViewingToday ? "Today" : viewDate.ToString("MMM d")) — check-ins by hour
+                        </div>
+                    </div>
+                </div>
+                <div class="attn-chart-body">
+                    @if (isViewLoading)
+                    {
+                        <div class="attn-chart-empty"><div class="loader"></div></div>
+                    }
+                    else if (!viewAttendance.Any())
+                    {
+                        <div class="attn-chart-empty">No check-ins for this day</div>
+                    }
+                    else
+                    {
+                        <div class="peak-chart">
+                            @for (int h = 5; h <= 22; h++)
+                            {
+                                var count  = PeakHoursData.GetValueOrDefault(h, 0);
+                                var barPct = PeakHoursMax > 0 ? (count * 100 / PeakHoursMax) : 0;
+                                var isPeak = count == PeakHoursMax && count > 0;
+                                <div class="peak-row @(count == 0 ? "peak-row-empty" : "") @(isPeak ? "peak-row-top" : "")">
+                                    <div class="peak-label">@FormatHour(h)</div>
+                                    <div class="peak-track">
+                                        <div class="peak-bar @(isPeak ? "peak-bar-top" : "")"
+                                             style="width: @(barPct < 2 && count > 0 ? 2 : barPct)%;"></div>
+                                    </div>
+                                    <div class="peak-right">
+                                        <span class="peak-count">@(count > 0 ? count.ToString() : "—")</span>
+                                        @if (isPeak)
+                                        {
+                                            <span class="peak-badge">PEAK</span>
+                                        }
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    }
+                </div>
+            </div>
+
+        </div>
+    }
+
     <!-- ═══ KPI Stats ═══ -->
-    <div class="stats-row attn-stats-row" style="grid-template-columns:repeat(4,1fr);">
+    <div class="attn-single-stat">
 
-        <div class="kpi-card">
+        <div class="kpi-card attn-kpi-featured">
             <div class="kpi-icon kpi-icon-green">
                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/>
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
                 </svg>
             </div>
             <div class="kpi-body">
-                <div class="kpi-label">Total Check-ins</div>
+                <div class="kpi-label">Today's Check-ins</div>
                 <div class="kpi-value kpi-green">@todayAttendance.Count</div>
-                <div class="kpi-sub">Members today</div>
+                <div class="kpi-sub">Members checked in today</div>
             </div>
         </div>
 
-        <div class="kpi-card">
-            <div class="kpi-icon kpi-icon-red">
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M15.59 14.37a6 6 0 01-5.84 7.38v-4.82m5.84-2.56a14.98 14.98 0 006.16-12.12A14.98 14.98 0 009.631 8.41m5.96 5.96a14.926 14.926 0 01-5.841 2.58m-.119-8.54a6 6 0 00-7.381 5.84h4.82m2.56-5.84a14.927 14.927 0 00-2.58 5.84m2.699 2.7c-.103.021-.207.041-.311.06a15.09 15.09 0 01-2.448-2.448 14.9 14.9 0 01.06-.312m-2.24 2.39a4.493 4.493 0 00-1.757 4.306 4.493 4.493 0 004.306-1.758M16.5 9a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0z"/>
+        <button class="kpi-card attn-kpi-add" @onclick="OpenAddModal">
+            <div class="kpi-icon kpi-icon-accent">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
                 </svg>
             </div>
             <div class="kpi-body">
-                <div class="kpi-label">Boxing / TaekWondo</div>
-                <div class="kpi-value kpi-red">@todayAttendance.Count(a => a.Name == "Boxing/TaekWondo")</div>
-                <div class="kpi-sub">Check-ins today</div>
+                <div class="kpi-label">Quick Action</div>
+                <div class="kpi-value" style="font-size:1.5rem;color:var(--accent);">Add Check-In</div>
+                <div class="kpi-sub">Log a member's visit</div>
             </div>
-        </div>
-
-        <div class="kpi-card">
-            <div class="kpi-icon kpi-icon-green">
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M6.429 9.75L2.25 12l4.179 2.25m0-4.5l5.571 3 5.571-3m-11.142 0L2.25 7.5 12 2.25l9.75 5.25-4.179 2.25m0 0L21.75 12l-4.179 2.25m0 0l4.179 2.25L12 21.75 2.25 16.5l4.179-2.25m11.142 0l-5.571 3-5.571-3"/>
-                </svg>
-            </div>
-            <div class="kpi-body">
-                <div class="kpi-label">Gym Members</div>
-                <div class="kpi-value kpi-green">@todayAttendance.Count(a => a.Name == "Gym")</div>
-                <div class="kpi-sub">Check-ins today</div>
-            </div>
-        </div>
-
-        <div class="kpi-card">
-            <div class="kpi-icon kpi-icon-purple">
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 9l10.5-3m0 6.553v3.75a2.25 2.25 0 01-1.632 2.163l-1.32.377a1.803 1.803 0 11-.99-3.467l2.31-.66a2.25 2.25 0 001.632-2.163zm0 0V2.25L9 5.25v10.303m0 0v3.75a2.25 2.25 0 01-1.632 2.163l-1.32.377a1.803 1.803 0 01-.99-3.467l2.31-.66A2.25 2.25 0 009 15.553z"/>
-                </svg>
-            </div>
-            <div class="kpi-body">
-                <div class="kpi-label">Zumba</div>
-                <div class="kpi-value kpi-purple">@todayAttendance.Count(a => a.Name == "Zumba")</div>
-                <div class="kpi-sub">Check-ins today</div>
-            </div>
-        </div>
+        </button>
 
     </div>
 
@@ -166,21 +227,39 @@
         </div>
     </div>
 
-    <!-- ═══ Today's Attendance Log ═══ -->
+    <!-- ═══ Attendance Log ═══ -->
     <div class="ant-card gym-table-card">
         <div class="ant-card-body attn-log-header-body">
-            <span class="dash-title attn-log-title">Today's Attendance Log</span>
+            <span class="dash-title attn-log-title">
+                Attendance Log
+                @if (!IsViewingToday)
+                {
+                    <span class="attn-log-date-badge">@viewDate.ToString("MMMM d, yyyy")</span>
+                }
+            </span>
+            <div class="attn-log-date-pick">
+                <label class="attn-date-label">View date</label>
+                <input class="attn-date-input"
+                       type="date"
+                       value="@ViewDateString"
+                       max="@DateTime.Today.ToString("yyyy-MM-dd")"
+                       @onchange="OnDateChanged" />
+                @if (!IsViewingToday)
+                {
+                    <button class="attn-today-btn" @onclick="OnResetToToday">Today</button>
+                }
+            </div>
         </div>
         <div class="ant-card-body attn-log-table-body">
-            @if (isLoading)
+            @if (isLoading || isViewLoading)
             {
                 <div class="table-state"><div class="loader"></div></div>
             }
-            else if (!todayAttendance.Any())
+            else if (!viewAttendance.Any())
             {
                 <div class="table-state">
                     <span class="attn-empty-icon">📋</span>
-                    <span>No check-ins yet today.</span>
+                    <span>@(IsViewingToday ? "No check-ins yet today." : $"No check-ins on {viewDate:MMM d, yyyy}.")</span>
                 </div>
             }
             else
@@ -190,22 +269,41 @@
                         <tr>
                             <th class="attn-col-name">Name</th>
                             <th class="attn-col-type">Membership Type</th>
-                            <th class="attn-col-type">Expiry Date</th>
+                            <th class="attn-col-type">Expiry</th>
                             <th class="attn-col-time">Check-in Time</th>
                         </tr>
                     </thead>
                     <tbody>
-                        @foreach (var record in todayAttendance)
+                        @foreach (var record in pagedLog)
                         {
                             <tr>
                                 <td class="cell-name attn-col-name">@record.FirstName @record.LastName</td>
                                 <td class="cell-muted attn-col-type">@record.Name</td>
-                                <td class="cell-muted attn-col-type">@FormatExpiryDate(record.ExpiryDate)</td>
+                                <td class="attn-col-type">
+                                    @{
+                                        var daysLeft = record.ExpiryDate.HasValue
+                                            ? (record.ExpiryDate.Value.Date - DateTime.Today).Days
+                                            : (int?)null;
+                                    }
+                                    @if (daysLeft.HasValue)
+                                    {
+                                        <span class="ant-tag @GetExpiryTagClass(daysLeft.Value)">@GetExpiryTagText(daysLeft.Value)</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="ant-tag ant-tag-muted">N/A</span>
+                                    }
+                                </td>
                                 <td class="cell-muted attn-col-time">@record.CheckInTime.ToString("hh:mm tt")</td>
                             </tr>
                         }
                     </tbody>
                 </table>
+                <PaginationControls CurrentPage="logPage"
+                                    TotalPages="logTotalPages"
+                                    TotalItems="viewAttendance.Count"
+                                    PageSize="LogPageSize"
+                                    OnPageChanged="OnLogPageChange" />
             }
         </div>
     </div>
@@ -265,71 +363,73 @@
 
 </GymModal>
 
-@* ═══ Member Picker — content passed to AppModal via ModalService ═══ *@
-@code {
-    private RenderFragment MemberPickerContent => __builder =>
-    {
-        <div style="position:relative;margin-bottom:6px;">
-            <input style="width:100%;box-sizing:border-box;background:#1a1a1a;border:1px solid #2a2a2a;border-radius:8px;padding:10px 12px 10px 16px;color:#F1F5F9;font-size:0.875rem;outline:none;"
-                   type="text"
-                   placeholder="🔍  Search by name..."
-                   value="@modalSearchText"
-                   @oninput="OnModalSearchInput" />
-        </div>
+<!-- ═══ Member Picker Modal ═══ -->
+<GymModal IsOpen="showMemberPickerModal"
+          Title="Select Member to Check In"
+          MaxWidth="720px"
+          OnClose="ClosePickerModal">
 
-        <div style="font-size:0.72rem;color:#4B5563;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:10px;margin-top:4px;">
-            @ModalFilteredMembers.Count member@(ModalFilteredMembers.Count != 1 ? "s" : "")
-        </div>
+    <div style="position:relative;margin-bottom:6px;">
+        <input class="gym-modal-search-input"
+               type="text"
+               placeholder="🔍  Search by name..."
+               value="@modalSearchText"
+               @oninput="OnModalSearchInput" />
+    </div>
 
-        <div style="border:1px solid #1f1f1f;border-radius:8px;overflow:hidden;">
-            @if (!ModalFilteredMembers.Any())
+    <div class="modal-member-count">
+        @ModalFilteredMembers.Count member@(ModalFilteredMembers.Count != 1 ? "s" : "")
+    </div>
+
+    <div class="modal-member-list">
+        @if (!ModalFilteredMembers.Any())
+        {
+            <div class="modal-member-empty">No members found.</div>
+        }
+        else
+        {
+            @foreach (var member in ModalFilteredMembers)
             {
-                <div style="padding:2rem;text-align:center;color:#4B5563;font-size:0.875rem;">No members found.</div>
-            }
-            else
-            {
-                @foreach (var member in ModalFilteredMembers)
-                {
-                    var alreadyIn = todayAttendance.Any(a => a.UserID == member.UserId);
-                    var isExpired = !IsMembershipValid(member.UserId);
+                var alreadyIn = todayAttendance.Any(a => a.UserID == member.UserId);
+                var isExpired = !IsMembershipValid(member.UserId);
 
-                    <div class="modal-member-row @(alreadyIn || isExpired ? "dimmed" : "")">
-                        <div class="modal-member-left">
-                            <div class="modal-member-avatar" style="@(isExpired ? "background:#2d1515;border-color:rgba(239,68,68,0.3);color:#EF4444;" : "")">
-                                @member.FirstName[0]@member.LastName[0]
-                            </div>
-                            <div class="modal-member-info">
-                                <span class="modal-member-name">@member.FirstName @member.LastName</span>
-                                <span class="modal-member-expiry" style="@(isExpired ? "color:#EF4444;" : "")">
-                                    @FormatExpiryDate(member.ExpiryDate)
-                                </span>
-                            </div>
+                <div class="modal-member-row @(alreadyIn || isExpired ? "dimmed" : "")">
+                    <div class="modal-member-left">
+                        <div class="modal-member-avatar @(isExpired ? "modal-member-avatar--expired" : "")">
+                            @member.FirstName[0]@member.LastName[0]
                         </div>
-                        <div class="modal-member-right">
-                            @if (alreadyIn)
-                            {
-                                <span class="modal-checkedin-badge">✓ Checked In</span>
-                            }
-                            else if (isExpired)
-                            {
-                                <button class="ant-btn gym-btn-expired"
-                                        @onclick="() => OnModalExpiredClick(member)">
-                                    ⚠ Expired
-                                </button>
-                            }
-                            else
-                            {
-                                <Button Class="gym-btn-checkin"
-                                        Disabled="@isCheckingIn"
-                                        Loading="@(isCheckingIn && checkingInUserId == member.UserId)"
-                                        OnClick="() => OnModalCheckIn(member.UserId)">
-                                    ✓ Check In
-                                </Button>
-                            }
+                        <div class="modal-member-info">
+                            <span class="modal-member-name">@member.FirstName @member.LastName</span>
+                            <span class="modal-member-expiry @(isExpired ? "modal-member-expiry--expired" : "")">
+                                @FormatExpiryDate(member.ExpiryDate)
+                            </span>
                         </div>
                     </div>
-                }
+                    <div class="modal-member-right">
+                        @if (alreadyIn)
+                        {
+                            <span class="modal-checkedin-badge">✓ Checked In</span>
+                        }
+                        else if (isExpired)
+                        {
+                            <button class="ant-btn gym-btn-expired"
+                                    @onclick="() => OnModalExpiredClick(member)">
+                                ⚠ Expired
+                            </button>
+                        }
+                        else
+                        {
+                            <Button Class="gym-btn-checkin"
+                                    Disabled="@isCheckingIn"
+                                    Loading="@(isCheckingIn && checkingInUserId == member.UserId)"
+                                    OnClick="() => OnModalCheckIn(member.UserId)">
+                                ✓ Check In
+                            </Button>
+                        }
+                    </div>
+                </div>
             }
-        </div>
-    };
-}
+        }
+    </div>
+
+</GymModal>

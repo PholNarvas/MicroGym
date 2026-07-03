@@ -23,21 +23,9 @@ namespace MicroGym.Shared.DTOs
         public string? Phone { get; set; }
 
         [Required(ErrorMessage = "Please select a membership plan.")]
-        [Range(1, 6, ErrorMessage = "Please select a valid membership plan.")]
+        [Range(1, int.MaxValue, ErrorMessage = "Please select a valid membership plan.")]
         public int MemberShipTypeID { get; set; }
 
-        [Required(ErrorMessage = "Please select a Payment Method.")]
-        public string? PaymentMethod { get; set; }
-
-        [Required(ErrorMessage = "Please Insert an amount.")]
-        public decimal? Price { get; set; }
         public bool? IsActive { get; set; }
-
-        // Optional — only update password if filled in
-        [MinLength(6, ErrorMessage = "Password must be at least 6 characters.")]
-        public string? Password { get; set; }
-
-        [Compare(nameof(Password), ErrorMessage = "Passwords do not match.")]
-        public string? ConfirmPassword { get; set; }
     }
 }

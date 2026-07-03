@@ -1,4 +1,5 @@
 using MicroGym.Shared.Model;
+using System.Reflection.Metadata;
 
 namespace MicroGym.Client.Pages.BaseApplicationMethods
 {
@@ -14,6 +15,11 @@ namespace MicroGym.Client.Pages.BaseApplicationMethods
         public async Task<User?> GetMemberById(int userId)
         {
             return await MemberService.GetMemberByIdAsync(userId);
+        }
+
+        public async Task<List<User>> GetExpiringMembers()
+        {
+            return await MemberService.GetExpiringMemberAsync();
         }
     }
 }

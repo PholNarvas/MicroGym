@@ -13,7 +13,8 @@ namespace MicroGym.Data.Repository.MemberRepo
 
         public MemberRepository(IConfiguration configuration)
         {
-            connectionString = configuration.GetConnectionString("DefaultConnection")!;
+            connectionString = configuration.GetConnectionString("DefaultConnection")
+                ?? throw new InvalidOperationException("DefaultConnection string is not configured in appsettings.");
         }
 
         public async Task<List<User>> GetAllMembers()
@@ -21,6 +22,16 @@ namespace MicroGym.Data.Repository.MemberRepo
             using var connection = new SqlConnection(connectionString);
 
             var userList = await connection.QueryAsync<User>("pr_GetAllUsers",
+                commandType: System.Data.CommandType.StoredProcedure);
+
+            return userList.ToList();
+        }
+
+        public async Task<List<User>> GetExpiringMembers()
+        {
+            using var connection = new SqlConnection(connectionString);
+
+            var userList = await connection.QueryAsync<User>("pr_GetMembersExpiring7Days",
                 commandType: System.Data.CommandType.StoredProcedure);
 
             return userList.ToList();
@@ -38,28 +49,84 @@ namespace MicroGym.Data.Repository.MemberRepo
         {
             using var connection = new SqlConnection(connectionString);
 
-            try
+            var result = await connection.ExecuteScalarAsync<int>(
+                "pr_SaveMemberInfo",
+                new
+                {
+                    UserID           = member.UserId,
+                    FirstName        = member.FirstName,
+                    LastName         = member.LastName,
+                    Email            = member.Email,
+                    Phone            = member.Phone,
+                    MemberShipTypeID = member.MemberShipTypeID,
+                    IsActive         = member.IsActive
+                },
+                commandType: CommandType.StoredProcedure);
+
+            return result switch
             {
-                var parameters = new DynamicParameters();
-                parameters.Add("@UserID", member.UserId, DbType.Int32, ParameterDirection.InputOutput);
-                parameters.Add("@FirstName", member.FirstName, DbType.String);
-                parameters.Add("@LastName", member.LastName, DbType.String);
-                parameters.Add("@Email", member.Email, DbType.String);
-                parameters.Add("@Phone", member.Phone, DbType.String);
-                parameters.Add("@PaymentMethod", member.PaymentMethod, DbType.String);
-                parameters.Add("@PaymentAmount", member.Price, DbType.Decimal);
-                parameters.Add("@MemberShipTypeID", member.MemberShipTypeID, DbType.Int32);
-                parameters.Add("@IsActive", member.IsActive, DbType.Boolean);
+                1  => true,
+                -1 => throw new InvalidOperationException("Email is already in use by another member."),
+                _  => false  // 0 = user not found
+            };
+        }
 
-                await connection.ExecuteAsync(
-                    "pr_SaveMemberInfo",
-                    parameters,
-                    commandType: CommandType.StoredProcedure);
+        public async Task<bool> RenewMember(RenewMemberDto dto)
+        {
+            using var connection = new SqlConnection(connectionString);
 
-                var returnedUserID = parameters.Get<int>("@UserID");
-                return returnedUserID > 0;
-            }
-            catch (Exception ex) { throw; }
+            var result = await connection.ExecuteScalarAsync<int>(
+                "pr_RenewMember",
+                new
+                {
+                    UserID           = dto.UserId,
+                    MemberShipTypeID = dto.MemberShipTypeID,
+                    PaymentAmount    = dto.PaymentAmount,
+                    PaymentMethod    = dto.PaymentMethod
+                },
+                commandType: CommandType.StoredProcedure);
+
+            return result switch
+            {
+                1  => true,
+                0  => throw new InvalidOperationException("Member not found."),
+                -1 => throw new InvalidOperationException("Membership type not found."),
+                _  => throw new InvalidOperationException($"Unexpected result from database: {result}")
+            };
+        }
+
+        public async Task<bool> PurchaseAnnualMembership(PurchaseAnnualMembershipDto dto)
+        {
+            using var connection = new SqlConnection(connectionString);
+
+            var result = await connection.ExecuteScalarAsync<int>(
+                "pr_PurchaseAnnualMembership",
+                new
+                {
+                    UserID = dto.UserId,
+                    TierID = dto.TierID,
+                    PaymentMethod = dto.PaymentMethod
+                },
+                commandType: CommandType.StoredProcedure);
+
+            return result switch
+            {
+                1 => true,
+                0 => throw new InvalidOperationException("Member not found."),
+                -1 => throw new InvalidOperationException("Membership tier not found or is no longer active."),
+                _ => throw new InvalidOperationException($"Unexpected result from database: {result}")
+            };
+        }
+
+        public async Task<List<MembershipTier>> GetMembershipTiers()
+        {
+            using var connection = new SqlConnection(connectionString);
+
+            var tiers = await connection.QueryAsync<MembershipTier>(
+                "pr_GetMembershipTiers",
+                commandType: CommandType.StoredProcedure);
+
+            return tiers.ToList();
         }
 
         public async Task<bool> DeleteMember(int userID)
@@ -72,6 +139,56 @@ namespace MicroGym.Data.Repository.MemberRepo
                 commandType: CommandType.StoredProcedure);
 
             return rowsAffected > 0;
+        }
+
+        public async Task<List<MemberPaymentRecord>> GetMemberPaymentHistory(int userId)
+        {
+            using var connection = new SqlConnection(connectionString);
+
+            var records = await connection.QueryAsync<MemberPaymentRecord>(
+                "pr_GetMemberPaymentHistory",
+                new { UserID = userId },
+                commandType: CommandType.StoredProcedure);
+
+            return records.ToList();
+        }
+
+        public async Task<bool> UpdateProfilePicture(UpdateProfilePictureDto dto)
+        {
+            using var connection = new SqlConnection(connectionString);
+
+            var rowsAffected = await connection.ExecuteScalarAsync<int>(
+                "pr_UpdateProfilePicture",
+                new { UserID = dto.UserId, ProfilePicture = dto.ProfilePicture },
+                commandType: CommandType.StoredProcedure);
+
+            return rowsAffected > 0;
+        }
+
+        public async Task<int> AddExistingMember(AddExistingMemberDto dto, string passwordHash)
+        {
+            using var connection = new SqlConnection(connectionString);
+
+            var result = await connection.QueryFirstOrDefaultAsync<int>(
+                "pr_AddExistingMember",
+                new
+                {
+                    FirstName = dto.FirstName,
+                    LastName = dto.LastName,
+                    Email = dto.Email,
+                    Phone = dto.Phone,
+                    MemberShipTypeID = dto.MemberShipTypeID,
+                    PasswordHash = passwordHash,
+                    DateJoined = dto.DateJoined,
+                    ExpiryDate = dto.ExpiryDate,
+                    TierID = dto.TierID,
+                    TierExpiryDate = dto.TierExpiryDate,
+                    PaymentAmount = dto.PaymentAmount ?? 0,
+                    PaymentMethod = dto.PaymentMethod
+                },
+                commandType: CommandType.StoredProcedure);
+
+            return result; // -1 = duplicate email, > 0 = new UserID
         }
     }
 }

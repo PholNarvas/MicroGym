@@ -13,9 +13,11 @@ namespace MicroGym.Client.Pages.Attendance
             return IsMembershipValid(member);
         }
 
+        // ── Inline Search (page) ────────────────────────────────
+
         private void OnSearchInput(ChangeEventArgs e)
         {
-            searchText = e.Value?.ToString() ?? string.Empty;
+            searchText     = e.Value?.ToString() ?? string.Empty;
             checkInMessage = string.Empty;
 
             if (string.IsNullOrWhiteSpace(searchText))
@@ -24,32 +26,76 @@ namespace MicroGym.Client.Pages.Attendance
                 return;
             }
 
-            var query = searchText.Trim().ToLower();
-
+            var search = searchText.Trim().ToLower();
             searchResults = allMembers
-                .Where(m => m.FirstName.ToLower().Contains(query)
-                         || m.LastName.ToLower().Contains(query)
-                         || $"{m.FirstName} {m.LastName}".ToLower().Contains(query))
+                .Where(m => MatchesMemberSearch(m, search))
                 .Take(8)
                 .ToList();
         }
 
         private void ClearSearch()
         {
-            searchText = string.Empty;
+            searchText     = string.Empty;
             checkInMessage = string.Empty;
             searchResults.Clear();
         }
 
-        private void OpenAddModal()
+        // ── Date Picker ─────────────────────────────────────────
+
+        private async Task OnDateChanged(ChangeEventArgs e)
         {
-            modalSearchText = string.Empty;
-            ModalService.Show(MemberPickerContent, "Select Member to Check In");
+            if (!DateTime.TryParse(e.Value?.ToString(), out var date)) return;
+
+            viewDate      = date;
+            isViewLoading = true;
+            StateHasChanged();
+
+            viewAttendance = IsViewingToday
+                ? todayAttendance
+                : await GetAttendanceByDate(viewDate);
+
+            logPage       = 1;
+            isViewLoading = false;
         }
 
-        private void OnModalSearchInput(ChangeEventArgs e)
+        private async Task OnResetToToday()
         {
-            modalSearchText = e.Value?.ToString() ?? string.Empty;
+            await OnDateChanged(new ChangeEventArgs { Value = DateTime.Today.ToString("yyyy-MM-dd") });
+        }
+
+        // ── Pagination ───────────────────────────────────────────
+
+        private void OnLogPageChange(int page) => logPage = page;
+
+        // ── Member Picker Modal ──────────────────────────────────
+
+        private void OpenAddModal()
+        {
+            modalSearchText       = string.Empty;
+            showMemberPickerModal = true;
+        }
+
+        private void ClosePickerModal()
+        {
+            showMemberPickerModal = false;
+            modalSearchText       = string.Empty;
+        }
+
+        private async Task OnModalSearchInput(ChangeEventArgs e)
+        {
+            var text = e.Value?.ToString() ?? string.Empty;
+
+            // Cancel the previous pending search so rapid keystrokes
+            // don't trigger a re-render on every character.
+            _modalSearchCts?.Cancel();
+            _modalSearchCts = new CancellationTokenSource();
+
+            try
+            {
+                await Task.Delay(180, _modalSearchCts.Token);
+                modalSearchText = text;
+            }
+            catch (TaskCanceledException) { }
         }
 
         private async Task OnModalCheckIn(int userId)
@@ -57,15 +103,11 @@ namespace MicroGym.Client.Pages.Attendance
             await OnCheckIn(userId);
 
             if (checkInSuccess)
-                ModalService.Close();
+                ClosePickerModal();
         }
 
-        private void CloseSuccessAlert()
-        {
-            showSuccessAlert = false;
-        }
+        // ── Expired Alert ────────────────────────────────────────
 
-        // Called when the "Expired" button is clicked from the main search results.
         private void OnExpiredClick(User member)
         {
             expiredMemberName = $"{member.FirstName} {member.LastName}";
@@ -73,17 +115,17 @@ namespace MicroGym.Client.Pages.Attendance
             showExpiredAlert  = true;
         }
 
-        // Called when the "Expired" button is clicked from inside the member picker modal.
-        // Closes the modal first so the expired alert popup is visible behind it.
+        // Closes the picker first so the expired alert is visible on top.
         private void OnModalExpiredClick(User member)
         {
-            ModalService.Close();
+            ClosePickerModal();
             OnExpiredClick(member);
         }
 
-        private void CloseExpiredAlert()
-        {
-            showExpiredAlert = false;
-        }
+        private void CloseExpiredAlert() => showExpiredAlert = false;
+
+        // ── Success Alert ────────────────────────────────────────
+
+        private void CloseSuccessAlert() => showSuccessAlert = false;
     }
 }

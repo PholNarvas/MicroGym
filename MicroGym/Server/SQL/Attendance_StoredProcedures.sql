@@ -21,6 +21,9 @@ AS
 BEGIN
     SET NOCOUNT ON;
 
+    DECLARE @TodayStart DATETIME = CAST(GETDATE() AS DATE);
+    DECLARE @TomStart   DATETIME = DATEADD(DAY, 1, @TodayStart);
+
     SELECT
         [Attendance].[AttendanceID],
         [Attendance].[UserID],
@@ -34,7 +37,8 @@ BEGIN
             ON [Users].[UserID] = [Attendance].[UserID]
         INNER JOIN [dbo].[MembershipTypes]
             ON [MembershipTypes].[MembershipTypeID] = [Users].[MemberShipTypeID]
-    WHERE CAST([Attendance].[CheckInTime] AS DATE) = CAST(GETDATE() AS DATE)
+    WHERE [Attendance].[CheckInTime] >= @TodayStart
+      AND [Attendance].[CheckInTime]  < @TomStart
     ORDER BY [Attendance].[CheckInTime] DESC;
 END;
 GO
@@ -49,24 +53,36 @@ AS
 BEGIN
     SET NOCOUNT ON;
 
-    -- Guard 1: Block if membership is expired.
+    DECLARE @TodayStart DATETIME = CAST(GETDATE() AS DATE);
+    DECLARE @TomStart   DATETIME = DATEADD(DAY, 1, @TodayStart);
+
+    -- Guard 1: Block if membership is expired or user not found.
     IF NOT EXISTS (
         SELECT 1 FROM [dbo].[Users]
         WHERE [UserID] = @UserID
-          AND [ExpiryDate] >= CAST(GETDATE() AS DATE)
-    )
-        RETURN;
-
-    -- Guard 2: Block if already checked in today.
-    IF NOT EXISTS (
-        SELECT 1 FROM [dbo].[Attendance]
-        WHERE [UserID] = @UserID
-          AND CAST([CheckInTime] AS DATE) = CAST(GETDATE() AS DATE)
+          AND [ExpiryDate] >= @TodayStart
     )
     BEGIN
-        INSERT INTO [dbo].[Attendance] ([UserID], [CheckInTime])
-        VALUES (@UserID, GETDATE());
+        SELECT -1; -- expired or not found
+        RETURN;
     END
+
+    -- Guard 2: Block if already checked in today.
+    IF EXISTS (
+        SELECT 1 FROM [dbo].[Attendance]
+        WHERE [UserID] = @UserID
+          AND [CheckInTime] >= @TodayStart
+          AND [CheckInTime]  < @TomStart
+    )
+    BEGIN
+        SELECT 0; -- already checked in
+        RETURN;
+    END
+
+    INSERT INTO [dbo].[Attendance] ([UserID], [CheckInTime])
+    VALUES (@UserID, GETDATE());
+
+    SELECT 1; -- success
 END;
 GO
 
@@ -80,9 +96,13 @@ AS
 BEGIN
     SET NOCOUNT ON;
 
+    DECLARE @TodayStart DATETIME = CAST(GETDATE() AS DATE);
+    DECLARE @TomStart   DATETIME = DATEADD(DAY, 1, @TodayStart);
+
     SELECT COUNT(1)
     FROM [dbo].[Attendance]
     WHERE [UserID] = @UserID
-      AND CAST([CheckInTime] AS DATE) = CAST(GETDATE() AS DATE);
+      AND [CheckInTime] >= @TodayStart
+      AND [CheckInTime]  < @TomStart;
 END;
 GO

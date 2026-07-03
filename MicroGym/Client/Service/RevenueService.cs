@@ -12,17 +12,23 @@ namespace MicroGym.Client.Service
             _httpClient = httpClient;
         }
 
-        public async Task<List<Payment>> GetRevenue(int month, int year)
+        public async Task<List<RevenuePaymentDetail>> GetRevenue(int month, int year)
         {
             var dateParam = new DateOnly(year, month, 1).ToString("yyyy-MM-dd");
-            var revenue = await _httpClient.GetFromJsonAsync<List<Payment>>($"api/Revenue/GetRevenue?month={dateParam}");
-            return revenue ?? new List<Payment>();
+            var result = await _httpClient.GetFromJsonAsync<List<RevenuePaymentDetail>>($"api/Revenue/GetRevenue?month={dateParam}");
+            return result ?? new List<RevenuePaymentDetail>();
         }
 
         public async Task<Revenue?> GetYearlyRevenue()
         {
             var totalRevenue = await _httpClient.GetFromJsonAsync<Revenue>("api/Revenue/GetYearlyRevenue");
             return totalRevenue;
+        }
+
+        public async Task<List<RevenueChartMonth>> GetRevenueChartByYearAsync(int year)
+        {
+            var result = await _httpClient.GetFromJsonAsync<List<RevenueChartMonth>>($"api/Revenue/GetRevenueChart?year={year}");
+            return result ?? new List<RevenueChartMonth>();
         }
     }
 }

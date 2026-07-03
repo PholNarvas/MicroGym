@@ -22,8 +22,8 @@
             return localStorage.getItem('microgym-theme') || 'dark';
         };
     </script>
-    <!-- Ant Design v4 CSS -->
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/antd/4.24.16/antd.min.css" rel="stylesheet" />
+    <!-- Ant Design v4 CSS (local — no internet required) -->
+    <link href="lib/antd.min.css" rel="stylesheet" />
     <link href="css/app.css" rel="stylesheet" />
     <link rel="icon" type="image/png" href="favicon.png" />
     <link href="MicroGym.Client.styles.css" rel="stylesheet" />
@@ -57,8 +57,8 @@
 
     <script src="_framework/blazor.webassembly.js"></script>
     <script src="_content/AntDesign/js/ant-design-blazor.js"></script>
-    <!-- Chart.js for Revenue graphs -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+    <!-- Chart.js for Revenue graphs (local — no internet required) -->
+    <script src="lib/chart.umd.min.js"></script>
     <script>
         window.microgym.initRevenueChart = function (canvasId, labels, incomeData, expenseData) {
             var canvas = document.getElementById(canvasId);

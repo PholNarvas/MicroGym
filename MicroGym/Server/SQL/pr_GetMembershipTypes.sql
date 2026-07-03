@@ -10,10 +10,13 @@ BEGIN
     SELECT
         [MembershipTypeID],
         [Name],
+        [SubscriptionType],
         [Price],
+        [DiscountedPrice],
         [DurationInMonths],
+        [DurationInDays],
         [IsWalkIn]
     FROM [dbo].[MembershipTypes]
-    ORDER BY [MembershipTypeID];
+    ORDER BY [Name], [DurationInMonths];
 END;
 GO

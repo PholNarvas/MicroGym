@@ -7,7 +7,7 @@
 --              StatusCode = 'INVALID_PLAN' -> MemberShipTypeID not found
 -- =============================================
 
-CREATE OR ALTER PROCEDURE [dbo].[sp_RegisterUser]
+CREATE OR ALTER PROCEDURE [dbo].[pr_RegisterUser]
     @MemberShipTypeID INT,
     @FirstName        NVARCHAR(50),
     @LastName         NVARCHAR(50),
@@ -27,7 +27,7 @@ BEGIN
     BEGIN
         SELECT 0 AS NewUserId, 'EMAIL_EXISTS' AS StatusCode;
         RETURN;
-    END
+    END;
 
     -- Get plan info
     DECLARE @DurationInMonths INT;
@@ -35,23 +35,29 @@ BEGIN
 
     SELECT @DurationInMonths = [DurationInMonths],
            @IsWalkIn         = [IsWalkIn]
-    FROM [dbo].[MembershipTypes]
-    WHERE [MemberShipTypeID] = @MemberShipTypeID;
+    FROM   [dbo].[MembershipTypes]
+    WHERE  [MembershipTypeID] = @MemberShipTypeID;
 
     IF @DurationInMonths IS NULL AND (@IsWalkIn IS NULL OR @IsWalkIn = 0)
     BEGIN
         SELECT 0 AS NewUserId, 'INVALID_PLAN' AS StatusCode;
         RETURN;
-    END
-
-    -- Compute ExpiryDate: walk-in = 1 day, else use DurationInMonths
-    DECLARE @ExpiryDate DATE;
-    SET @ExpiryDate = CASE
-        WHEN @IsWalkIn = 1 THEN DATEADD(DAY,   1,                    @CreatedAt)
-        ELSE                    DATEADD(MONTH, @DurationInMonths,     @CreatedAt)
     END;
 
-    -- Insert new user (IsActive = 1, Status = Paid from the start)
+    -- Compute ExpiryDate:
+    --   Walk-in  → same day (pay today, use today, expired tomorrow)
+    --   Regular  → DATEADD(MONTH) - 1 day so the last day is still valid
+    --              e.g. 1 month from July 1  = July 31  (valid), Aug 1 = expired
+    --              e.g. 6 months from July 1 = Dec 31   (valid), Jan 1 = expired
+    DECLARE @ExpiryDate DATE;
+    SET @ExpiryDate = CASE
+        WHEN @IsWalkIn = 1
+            THEN CAST(@CreatedAt AS DATE)
+        ELSE
+            DATEADD(DAY, -1, DATEADD(MONTH, @DurationInMonths, CAST(@CreatedAt AS DATE)))
+    END;
+
+    -- Insert new user
     INSERT INTO [dbo].[Users]
     (
         [MemberShipTypeID],
@@ -83,7 +89,11 @@ BEGIN
 
     DECLARE @NewUserId INT = CAST(SCOPE_IDENTITY() AS INT);
 
-    -- Record first payment
+    -- Return result FIRST so Dapper's QueryFirstOrDefaultAsync reads the
+    -- correct result set before pr_SavePayment potentially emits its own.
+    SELECT @NewUserId AS NewUserId, 'SUCCESS' AS StatusCode;
+
+    -- Record first payment (done AFTER the SELECT so it doesn't interfere)
     IF @PaymentAmount IS NOT NULL AND @PaymentMethod IS NOT NULL
     BEGIN
         EXEC [dbo].[pr_SavePayment]
@@ -92,7 +102,11 @@ BEGIN
             @PaymentAmount    = @PaymentAmount,
             @PaymentDate      = NULL,
             @PaymentMethod    = @PaymentMethod;
-    END
+    END;
 
-    SELECT @NewUserId AS NewUserId, 'SUCCESS' AS StatusCode;
-END
+    -- Auto check-in on registration day
+    INSERT INTO [dbo].[Attendance] ([UserID], [CheckInTime])
+    VALUES (@NewUserId, GETDATE());
+
+END;
+GO

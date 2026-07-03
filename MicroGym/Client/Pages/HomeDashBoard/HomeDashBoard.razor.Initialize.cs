@@ -20,46 +20,38 @@ namespace MicroGym.Client.Pages.HomeDashBoard
             await LoadData();
         }
 
-        // Called on first load and after adding a member to refresh KPI counts.
+        // Called on first load and after adding/renewing a member.
         private async Task LoadData()
         {
-            isLoading = true;
-            StateHasChanged();
+            try
+            {
+                isLoading  = true;
+                expiryPage = 1;
+                StateHasChanged();
 
-            var membersTask    = GetMembers();
-            var attendanceTask = GetTodayAttendance();
+                var membersTask    = GetMembers();
+                var attendanceTask = GetTodayAttendance();
+                var expiringTask   = GetExpiringMembers();
 
-            await Task.WhenAll(membersTask, attendanceTask);
+                await Task.WhenAll(membersTask, attendanceTask, expiringTask);
 
-            var members    = membersTask.Result;
-            var attendance = attendanceTask.Result;
-
-            // ── Category splits ────────────────────────────────
-            boxingMembers = members.Where(m => m.MemberShipTypeID == 1).ToList();
-            gymMembers    = members.Where(m => m.MemberShipTypeID == 2).ToList();
-            zumbaMembers  = members.Where(m => m.MemberShipTypeID == 3).ToList();
-
-            totalMembers         = members.Count;
-            boxingTaekwondoCount = boxingMembers.Count(m => m.IsActive);
-            gymMemberCount       = gymMembers.Count(m => m.IsActive);
-            zumbaMemberCount     = zumbaMembers.Count(m => m.IsActive);
-
-            // ── Today's check-ins ──────────────────────────────
-            todayCheckInCount = attendance.Count;
-
-            // ── Expiring within 7 days ─────────────────────────
-            var today   = DateTime.Today;
-            var in7Days = today.AddDays(7);
-
-            expiringMembers = members
-                .Where(m => m.IsActive
-                         && m.ExpiryDate.HasValue
-                         && m.ExpiryDate.Value.Date >= today
-                         && m.ExpiryDate.Value.Date <= in7Days)
-                .OrderBy(m => m.ExpiryDate)
-                .ToList();
-
-            isLoading = false;
+                totalMembers       = membersTask.Result.Count;
+                totalActiveMembers = membersTask.Result.Count(x => x.ExpiryDate.HasValue && x.ExpiryDate.Value.Date >= DateTime.Today);
+                todayCheckInCount  = attendanceTask.Result.Count;
+                expiringMembers    = expiringTask.Result;
+            }
+            catch (HttpRequestException ex) when (ex.StatusCode == System.Net.HttpStatusCode.Unauthorized)
+            {
+                NavigationManager.NavigateTo("/login");
+            }
+            catch (Exception)
+            {
+                // Network failure, server error, or malformed JSON — lists stay empty.
+            }
+            finally
+            {
+                isLoading = false;
+            }
         }
     }
 }

@@ -25,6 +25,7 @@
     max-width: 680px;
     max-height: 90vh;
     overflow-y: auto;
+    scroll-behavior: smooth;
     box-shadow: var(--shadow-lg);
     animation: modalSlideIn 0.22s cubic-bezier(0.16, 1, 0.3, 1);
 }

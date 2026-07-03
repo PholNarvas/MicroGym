@@ -21,7 +21,7 @@ namespace MicroGym.Shared.DTOs
         public string? Phone { get; set; }
 
         [Required(ErrorMessage = "Please select a membership plan.")]
-        [Range(1, 6, ErrorMessage = "Please select a valid membership plan.")]
+        [Range(1, int.MaxValue, ErrorMessage = "Please select a valid membership plan.")]
         public int MemberShipTypeID { get; set; }
 
         [Required(ErrorMessage = "Password is required.")]
@@ -38,5 +38,9 @@ namespace MicroGym.Shared.DTOs
 
         [Required(ErrorMessage = "Please select a payment method.")]
         public string PaymentMethod { get; set; } = string.Empty;
+
+        /// When set, the backend purchases this tier after registration.
+        /// Null = no tier upgrade (member stays on Standard).
+        public int? TierID { get; set; }
     }
 }

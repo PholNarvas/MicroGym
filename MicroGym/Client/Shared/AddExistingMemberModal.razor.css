@@ -1,0 +1,39 @@
+/* ── Peso prefix on Amount input ─────────────────── */
+.gym-input-prefix-wrap {
+    position: relative;
+    display: flex;
+    align-items: center;
+    width: 100%;
+}
+.gym-input-prefix-wrap .ant-input { width: 100%; }
+.gym-input-prefix {
+    position: absolute;
+    left: 12px;
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    pointer-events: none;
+    z-index: 1;
+}
+.gym-input-with-prefix { padding-left: 28px !important; }
+
+/* Hide number-input spinner arrows */
+.gym-input-with-prefix::-webkit-outer-spin-button,
+.gym-input-with-prefix::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+.gym-input-with-prefix { -moz-appearance: textfield; }
+
+/* Section hint (e.g. "+ ₱500 annual fee included") */
+.gym-modal-section-hint {
+    font-weight: 400;
+    color: #EAB308;
+    font-size: 0.75rem;
+    text-transform: none;
+    margin-left: 6px;
+}
+
+/* Payment row — two columns aligned at the top */
+.payment-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    align-items: start;
+}

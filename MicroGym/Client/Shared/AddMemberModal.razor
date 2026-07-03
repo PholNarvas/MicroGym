@@ -72,16 +72,50 @@
                     <option value="0">-- Select a plan --</option>
                     @foreach (var mt in membershipTypes)
                     {
-                        <option value="@mt.MembershipTypeID">@mt.Name (₱@mt.Price.ToString("N0"))</option>
+                        var displayPrice = isAnnualSelected && annualTier is not null
+                            ? Math.Round(mt.Price * (1 - annualTier.DiscountPct / 100), 2)
+                            : mt.Price;
+                        <option value="@mt.MembershipTypeID">
+                            @mt.Name@(mt.SubscriptionType != null ? $" — {mt.SubscriptionType}" : "")
+                            (₱@displayPrice.ToString("N0")@(isAnnualSelected ? " ⭐" : ""))
+                        </option>
                     }
                 </select>
                 <ValidationMessage For="@(() => model.MemberShipTypeID)" class="ant-form-item-explain-error" />
             </div>
 
+            <!-- ═══ Annual Membership Toggle ═══ -->
+            @if (annualTier is not null)
+            {
+                <div class="annual-toggle-card @(isAnnualSelected ? "annual-toggle-card--active" : "")">
+                    <div class="annual-toggle-left">
+                        <span class="annual-toggle-icon">⭐</span>
+                        <div>
+                            <div class="annual-toggle-title">@annualTier.TierName Membership</div>
+                            <div class="annual-toggle-sub">
+                                One-time ₱@annualTier.Fee.ToString("N0") · @annualTier.DiscountPct% off all plans for @annualTier.DurationMonths months
+                            </div>
+                        </div>
+                    </div>
+                    <label class="gym-toggle">
+                        <input type="checkbox"
+                               checked="@isAnnualSelected"
+                               @onchange="OnAnnualToggled" />
+                        <span class="gym-toggle-slider"></span>
+                    </label>
+                </div>
+            }
+
             <div class="gym-modal-section-label">Payment</div>
             <div class="form-row-2col">
                 <div class="ant-form-item gym-form-item">
-                    <label class="gym-label">Amount</label>
+                    <label class="gym-label">
+                        Amount
+                        @if (isAnnualSelected && annualTier is not null)
+                        {
+                            <span class="gym-modal-section-hint">+ ₱@annualTier.Fee.ToString("N0") tier fee included</span>
+                        }
+                    </label>
                     <div class="gym-input-prefix-wrap">
                         <span class="gym-input-prefix">₱</span>
                         <input class="ant-input gym-input gym-input-with-prefix"
@@ -101,23 +135,6 @@
                         <option value="Card">💳 Card</option>
                     </select>
                     <ValidationMessage For="@(() => model.PaymentMethod)" class="ant-form-item-explain-error" />
-                </div>
-            </div>
-
-            <div class="form-row-2col">
-                <div class="ant-form-item gym-form-item">
-                    <label class="gym-label">Password</label>
-                    <input class="ant-input gym-input" type="password" placeholder="Min. 6 characters"
-                           autocomplete="new-password"
-                           @bind="model.Password" @bind:event="oninput" />
-                    <ValidationMessage For="@(() => model.Password)" class="ant-form-item-explain-error" />
-                </div>
-                <div class="ant-form-item gym-form-item">
-                    <label class="gym-label">Confirm Password</label>
-                    <input class="ant-input gym-input" type="password" placeholder="Re-enter password"
-                           autocomplete="new-password"
-                           @bind="model.ConfirmPassword" @bind:event="oninput" />
-                    <ValidationMessage For="@(() => model.ConfirmPassword)" class="ant-form-item-explain-error" />
                 </div>
             </div>
 

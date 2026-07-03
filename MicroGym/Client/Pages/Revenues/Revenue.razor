@@ -1,10 +1,51 @@
 @page "/admin-revenue"
 @using BaseApplicationMethods
+@using MicroGym.Shared.Model
 @attribute [Authorize]
 @layout MainLayout
 @inherits BaseApplication
 
 <PageTitle>Revenue - MicroGym</PageTitle>
+
+@* ═══ Revenue PIN Lock ═══ *@
+@if (isRevenueLocked)
+{
+    <div class="rev-lock-overlay">
+        <div class="rev-lock-modal">
+
+            <div class="rev-lock-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="none"
+                     viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6">
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                          d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z"/>
+                </svg>
+            </div>
+
+            <h2 class="rev-lock-title">Revenue Access</h2>
+            <p class="rev-lock-sub">This section is restricted.<br/>Enter your PIN to continue.</p>
+
+            @if (!string.IsNullOrEmpty(pinError))
+            {
+                <div class="rev-lock-error">@pinError</div>
+            }
+
+            <input class="rev-lock-input"
+                   type="password"
+                   placeholder="Enter PIN"
+                   value="@pinInput"
+                   @oninput="@(e => pinInput = e.Value?.ToString() ?? string.Empty)"
+                   @onkeydown="OnPinKeyDown"
+                   autocomplete="off"/>
+
+            <button class="rev-lock-btn" @onclick="OnUnlockRevenue">
+                Unlock Revenue
+            </button>
+
+        </div>
+    </div>
+}
+else
+{
 
 <div class="dashboard">
 
@@ -43,7 +84,8 @@
     <!-- ═══ KPI Stat Cards ═══ -->
     @if (isLoading)
     {
-        <div class="stats-row">
+        <div class="stats-row stats-row--4">
+            <div class="kpi-card kpi-loading"><div class="loader"></div></div>
             <div class="kpi-card kpi-loading"><div class="loader"></div></div>
             <div class="kpi-card kpi-loading"><div class="loader"></div></div>
             <div class="kpi-card kpi-loading"><div class="loader"></div></div>
@@ -51,7 +93,7 @@
     }
     else
     {
-        <div class="stats-row">
+        <div class="stats-row stats-row--4">
 
             <!-- Total Earnings -->
             <div class="kpi-card">
@@ -62,8 +104,8 @@
                 </div>
                 <div class="kpi-body">
                     <div class="kpi-label">Total Earnings</div>
-                    <div class="kpi-value kpi-gold" style="font-size:1.5rem;">₱@totalEarnings.ToString("N2")</div>
-                    <div class="kpi-sub">All-time revenue</div>
+                    <div class="kpi-value kpi-gold">₱@totalEarnings.ToString("N2")</div>
+                    <div class="kpi-sub">@selectedYear total income</div>
                 </div>
             </div>
 
@@ -76,8 +118,9 @@
                 </div>
                 <div class="kpi-body">
                     <div class="kpi-label">Monthly Income</div>
-                    <div class="kpi-value kpi-green" style="font-size:1.5rem;">₱@monthlyIncome.ToString("N2")</div>
+                    <div class="kpi-value kpi-green">₱@monthlyIncome.ToString("N2")</div>
                     <div class="kpi-sub">@selectedMonthLabel @selectedYear</div>
+                    <div class="kpi-mom @MoMClass">@MoMText</div>
                 </div>
             </div>
 
@@ -90,8 +133,66 @@
                 </div>
                 <div class="kpi-body">
                     <div class="kpi-label">Monthly Expense</div>
-                    <div class="kpi-value kpi-red" style="font-size:1.5rem;">₱@monthlyExpense.ToString("N2")</div>
+                    <div class="kpi-value kpi-red">₱@monthlyExpense.ToString("N2")</div>
                     <div class="kpi-sub">@selectedMonthLabel @selectedYear</div>
+                </div>
+            </div>
+
+            <!-- Net Income -->
+            <div class="kpi-card">
+                <div class="kpi-icon @(monthlyNet >= 0 ? "kpi-icon-blue" : "kpi-icon-red")">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"/>
+                    </svg>
+                </div>
+                <div class="kpi-body">
+                    <div class="kpi-label">Net Income</div>
+                    <div class="kpi-value @(monthlyNet >= 0 ? "kpi-blue" : "kpi-red")">₱@monthlyNet.ToString("N2")</div>
+                    <div class="kpi-sub">Income minus expenses</div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- ═══ Breakdown Row ═══ -->
+        <div class="rev-breakdown-row">
+
+            <!-- Plan vs Tier -->
+            <div class="rev-breakdown-card">
+                <div class="rev-breakdown-title">Income by Type</div>
+                <div class="rev-breakdown-items">
+                    <div class="rev-breakdown-item">
+                        <span class="rev-breakdown-dot rev-breakdown-dot--plan"></span>
+                        <span class="rev-breakdown-label">Subscription</span>
+                        <span class="rev-breakdown-value">₱@planIncome.ToString("N2")</span>
+                    </div>
+                    <div class="rev-breakdown-item">
+                        <span class="rev-breakdown-dot rev-breakdown-dot--tier"></span>
+                        <span class="rev-breakdown-label">Annual Membership</span>
+                        <span class="rev-breakdown-value">₱@tierIncome.ToString("N2")</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Payment Methods -->
+            <div class="rev-breakdown-card">
+                <div class="rev-breakdown-title">Income by Payment Method</div>
+                <div class="rev-breakdown-items">
+                    @if (!paymentMethodBreakdown.Any())
+                    {
+                        <span class="rev-breakdown-empty">No income this month</span>
+                    }
+                    else
+                    {
+                        @foreach (var (method, amount) in paymentMethodBreakdown)
+                        {
+                            <div class="rev-breakdown-item">
+                                <span class="rev-breakdown-dot rev-breakdown-dot--method"></span>
+                                <span class="rev-breakdown-label">@method</span>
+                                <span class="rev-breakdown-value">₱@amount.ToString("N2")</span>
+                            </div>
+                        }
+                    }
                 </div>
             </div>
 
@@ -123,4 +224,87 @@
         </div>
     </div>
 
+    <!-- ═══ Transaction Table ═══ -->
+    @if (!isLoading)
+    {
+        <div class="ant-card rev-table-card">
+            <div class="ant-card-body rev-chart-header">
+                <div>
+                    <p class="rev-chart-title">Transactions — @selectedMonthLabel @selectedYear</p>
+                    <p class="rev-chart-sub">
+                        @paymentDetails.Count(p => p.Status == "Paid") paid
+                        @if (paymentDetails.Any(p => p.Status == "Expense"))
+                        {
+                            <span> · @paymentDetails.Count(p => p.Status == "Expense") expense</span>
+                        }
+                        @if (txTotalPages > 1)
+                        {
+                            <span> · page @txPage of @txTotalPages</span>
+                        }
+                    </p>
+                </div>
+            </div>
+            <div class="ant-card-body" style="padding-top:0; padding-bottom:0;">
+                @if (!paymentDetails.Any())
+                {
+                    <div class="rev-table-empty">No transactions for @selectedMonthLabel @selectedYear.</div>
+                }
+                else
+                {
+                    <table class="rev-table">
+                        <thead>
+                            <tr>
+                                <th>Member</th>
+                                <th>Plan</th>
+                                <th>Method</th>
+                                <th>Date</th>
+                                <th>Type</th>
+                                <th class="rev-table-amount">Amount</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var p in pagedTransactions)
+                            {
+                                <tr>
+                                    <td class="rev-table-name">@p.FirstName @p.LastName</td>
+                                    <td class="cell-muted">@(string.IsNullOrEmpty(p.PlanName) ? "—" : p.PlanName)</td>
+                                    <td class="cell-muted">@p.PaymentMethod</td>
+                                    <td class="cell-muted">@p.PaymentDate.ToString("MMM dd, yyyy")</td>
+                                    <td>
+                                        <span class="rev-type-tag @(p.PaymentType == "Tier" ? "rev-type-tier" : "rev-type-plan")">
+                                            @(p.PaymentType == "Tier" ? "Annual" : "Plan")
+                                        </span>
+                                    </td>
+                                    <td class="rev-table-amount @(p.Status == "Expense" ? "kpi-red" : "kpi-green")">
+                                        @(p.Status == "Expense" ? "−" : "+")₱@p.AmountPaid.ToString("N2")
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+
+                    @if (txTotalPages > 1)
+                    {
+                        <div class="rev-pagination">
+                            <button class="rev-page-btn" disabled="@(txPage == 1)"
+                                    @onclick="() => OnTxPageChange(txPage - 1)">←</button>
+
+                            @for (int i = 1; i <= txTotalPages; i++)
+                            {
+                                var p = i;
+                                <button class="rev-page-btn @(txPage == p ? "rev-page-btn--active" : "")"
+                                        @onclick="() => OnTxPageChange(p)">@p</button>
+                            }
+
+                            <button class="rev-page-btn" disabled="@(txPage == txTotalPages)"
+                                    @onclick="() => OnTxPageChange(txPage + 1)">→</button>
+                        </div>
+                    }
+                }
+            </div>
+        </div>
+    }
+
 </div>
+
+} @* end else (unlocked) *@

@@ -21,8 +21,21 @@ namespace MicroGym.Service.Auth
                 Price = request.PaymentAmount
             };
 
-            var (success, _) = await userRepository.RegisterAsync(user);
-            return success;
+            var (success, newUserId) = await userRepository.RegisterAsync(user);
+
+            if (!success) return false;
+
+            if (request.TierID.HasValue && newUserId > 0)
+            {
+                await memberRepository.PurchaseAnnualMembership(new PurchaseAnnualMembershipDto
+                {
+                    UserId        = newUserId,
+                    TierID        = request.TierID.Value,
+                    PaymentMethod = request.PaymentMethod
+                });
+            }
+
+            return true;
         }
     }
 }

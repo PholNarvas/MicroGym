@@ -15,15 +15,24 @@ namespace MicroGym.Client.Pages.Attendance
 
             if (success)
             {
-                // Get the member's name to show in the success popup
                 var member = allMembers.FirstOrDefault(m => m.UserId == userId);
                 checkedInMemberName = member is not null
                     ? $"{member.FirstName} {member.LastName}"
                     : "Member";
 
-                // Open success popup and refresh the attendance log at the same time
+                // Refresh all data that depends on today's check-ins
+                todayAttendance = await GetTodayAttendance();
+                weeklyData      = await GetWeeklyAttendanceSummary();
+
+                // Sync the log view if we're still on today
+                if (IsViewingToday)
+                {
+                    viewAttendance = todayAttendance;
+                    logPage        = 1;
+                }
+
                 showSuccessAlert = true;
-                todayAttendance  = await GetTodayAttendance();
+                StateHasChanged();
 
                 // Auto-close the popup after 3 seconds
                 _ = Task.Delay(3000).ContinueWith(_ =>

@@ -16,16 +16,16 @@
     z-index: 100;
 }
 
-/* ── Brand ────────────────────────────────────── */
+/* ── Brand (GNG Fitness Logo) ─────────────────── */
 .sidebar-brand-wrap {
-    padding: 1.1rem 0.9rem 1rem;
+    padding: 1rem 0.9rem;
     border-bottom: 1px solid var(--border-default);
     flex-shrink: 0;
 }
 .sidebar-brand-link {
     display: flex;
     align-items: center;
-    gap: 0.6rem;
+    gap: 0.65rem;
     text-decoration: none;
     padding: 0.5rem 0.6rem;
     border-radius: 8px;
@@ -33,21 +33,55 @@
 }
 .sidebar-brand-link:hover { background: var(--bg-hover); }
 
-.sb-icon {
-    width: 32px; height: 32px;
-    background: var(--accent-muted);
-    border: 1px solid rgba(34,197,94,0.3);
-    border-radius: 8px;
-    color: var(--accent);
-    display: flex; align-items: center; justify-content: center;
-    flex-shrink: 0;
+/* Stacked brand text */
+.sb-gng-text {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+    min-width: 0;
 }
-.sb-brand-text {
-    font-size: 0.85rem;
-    font-weight: 800;
-    letter-spacing: 1.5px;
+.sb-gng-nameline {
+    display: flex;
+    flex-direction: column;
+    line-height: 1.15;
+}
+.sb-gng-gng {
+    font-size: 0.82rem;
+    font-weight: 900;
+    letter-spacing: 2px;
     color: var(--text-primary);
+    text-transform: uppercase;
 }
+.sb-gng-fit {
+    font-size: 0.62rem;
+    font-weight: 700;
+    letter-spacing: 2.5px;
+    color: var(--accent);
+    text-transform: uppercase;
+}
+
+/* Italian tricolor underline */
+.sb-gng-tricolor {
+    display: flex;
+    height: 2px;
+    border-radius: 1px;
+    overflow: hidden;
+    margin: 2px 0 1px;
+}
+.tc-green { flex: 1; background: #22C55E; }
+.tc-white { flex: 1; background: #D1D5DB; }
+.tc-red   { flex: 1; background: #EF4444; }
+
+/* EST. 2008 */
+.sb-gng-est {
+    font-size: 0.5rem;
+    font-weight: 600;
+    letter-spacing: 1.5px;
+    color: var(--text-muted);
+    text-transform: uppercase;
+}
+
+/* Mobile brand accent (kept for mobile topbar span) */
 .sb-brand-accent { color: var(--accent); }
 
 /* ── Navigation ───────────────────────────────── */
@@ -92,6 +126,28 @@
 .sidebar-link span {
     color: inherit !important;
 }
+
+/* Revenue label + lock badge wrapper */
+.sb-link-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+/* Owner-only lock badge */
+.sb-owner-badge {
+    width: 18px;
+    height: 18px;
+    border-radius: 5px;
+    background: rgba(234, 179, 8, 0.12);
+    border: 1px solid rgba(234, 179, 8, 0.3);
+    color: #EAB308;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
 .sidebar-link:hover {
     background: var(--bg-hover);
     color: var(--text-primary);

@@ -1,7 +1,188 @@
+/* ── Revenue PIN Lock ─────────────────────────── */
+.rev-lock-overlay {
+    position: fixed;
+    inset: 0;
+    background: var(--bg-base);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 500;
+}
+.rev-lock-modal {
+    width: 100%;
+    max-width: 380px;
+    background: var(--bg-surface);
+    border: 1px solid var(--border-default);
+    border-radius: 16px;
+    padding: 2.5rem 2rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.75rem;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.35);
+}
+.rev-lock-icon {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    background: var(--accent-muted);
+    border: 1px solid rgba(34,197,94,0.3);
+    color: var(--accent);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 0.5rem;
+}
+.rev-lock-title {
+    font-size: 1.25rem;
+    font-weight: 800;
+    color: var(--text-primary);
+    margin: 0;
+    letter-spacing: -0.3px;
+}
+.rev-lock-sub {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    text-align: center;
+    margin: 0 0 0.5rem;
+    line-height: 1.6;
+}
+.rev-lock-error {
+    width: 100%;
+    background: var(--danger-muted);
+    border: 1px solid rgba(248,81,73,0.3);
+    color: var(--danger);
+    font-size: 0.8rem;
+    font-weight: 500;
+    padding: 0.55rem 0.85rem;
+    border-radius: 8px;
+    text-align: center;
+}
+.rev-lock-input {
+    width: 100%;
+    box-sizing: border-box;
+    background: var(--bg-elevated);
+    border: 1px solid var(--border-default);
+    border-radius: 8px;
+    color: var(--text-primary);
+    font-size: 1rem;
+    font-weight: 600;
+    padding: 0.7rem 1rem;
+    outline: none;
+    text-align: center;
+    letter-spacing: 4px;
+    transition: border-color 0.15s, box-shadow 0.15s;
+}
+.rev-lock-input:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px var(--accent-glow);
+}
+.rev-lock-input::placeholder {
+    letter-spacing: 0;
+    color: var(--text-muted);
+    font-weight: 400;
+}
+.rev-lock-btn {
+    width: 100%;
+    margin-top: 0.5rem;
+    padding: 0.75rem;
+    background: var(--accent);
+    border: none;
+    border-radius: 8px;
+    color: #000;
+    font-size: 0.9rem;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    cursor: pointer;
+    transition: background 0.15s, box-shadow 0.15s;
+}
+.rev-lock-btn:hover {
+    background: var(--accent-hover);
+    box-shadow: 0 0 0 3px var(--accent-glow);
+}
+
+/* ── Filters ──────────────────────────────────── */
 .rev-filter {
     display: flex;
     gap: 0.5rem;
     align-items: center;
+}
+
+/* ── 4-column KPI grid ── */
+.stats-row--4 {
+    grid-template-columns: repeat(4, 1fr);
+}
+
+/* ── Blue KPI variant (Net Income) ── */
+.kpi-icon-blue {
+    background: rgba(59,130,246,0.12);
+    color: #60A5FA;
+}
+.kpi-blue { color: #60A5FA; }
+
+/* ── Month-over-month indicator ── */
+.kpi-mom {
+    font-size: 0.72rem;
+    font-weight: 600;
+    margin-top: 4px;
+}
+.mom-up      { color: var(--accent); }
+.mom-down    { color: var(--danger); }
+.mom-neutral { color: var(--text-muted); }
+
+/* ── Breakdown row ── */
+.rev-breakdown-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+.rev-breakdown-card {
+    background: var(--bg-surface);
+    border: 1px solid var(--border-default);
+    border-radius: 12px;
+    padding: 1rem 1.25rem;
+}
+.rev-breakdown-title {
+    font-size: 0.68rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    color: var(--text-muted);
+    margin-bottom: 0.65rem;
+}
+.rev-breakdown-items {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+.rev-breakdown-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+.rev-breakdown-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+.rev-breakdown-dot--plan   { background: var(--accent); }
+.rev-breakdown-dot--tier   { background: #EAB308; }
+.rev-breakdown-dot--method { background: #60A5FA; }
+.rev-breakdown-label {
+    flex: 1;
+    font-size: 0.82rem;
+    color: var(--text-secondary);
+}
+.rev-breakdown-value {
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+.rev-breakdown-empty {
+    font-size: 0.82rem;
+    color: var(--text-muted);
 }
 
 /* ── Chart card ── */
@@ -39,4 +220,107 @@
     gap: 0.75rem;
     color: var(--text-muted);
     font-size: 0.875rem;
+}
+
+/* ── Transaction table ── */
+.rev-table-card {
+    margin-bottom: 1.5rem;
+    overflow: hidden;
+}
+.rev-table-empty {
+    padding: 2.5rem;
+    text-align: center;
+    font-size: 0.875rem;
+    color: var(--text-muted);
+}
+.rev-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.855rem;
+}
+.rev-table thead th {
+    padding: 0.6rem 1.25rem;
+    font-size: 0.67rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    color: var(--text-muted);
+    border-bottom: 2px solid var(--border-default);
+    white-space: nowrap;
+    text-align: left;
+}
+.rev-table tbody tr {
+    border-bottom: 1px solid var(--border-muted);
+    transition: background 0.12s;
+}
+.rev-table tbody tr:last-child { border-bottom: none; }
+.rev-table tbody tr:hover { background: var(--bg-hover); }
+.rev-table tbody td {
+    padding: 0.75rem 1.25rem;
+    vertical-align: middle;
+}
+.rev-table-name {
+    font-weight: 600;
+    color: var(--text-primary);
+    white-space: nowrap;
+}
+.rev-table-amount {
+    text-align: right !important;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+/* ── Pagination ── */
+.rev-pagination {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    padding: 0.85rem 1.25rem;
+    border-top: 1px solid var(--border-muted);
+}
+.rev-page-btn {
+    min-width: 32px;
+    height: 32px;
+    padding: 0 8px;
+    border-radius: 6px;
+    border: 1px solid var(--border-default);
+    background: transparent;
+    color: var(--text-secondary);
+    font-size: 0.8rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.15s, border-color 0.15s, color 0.15s;
+}
+.rev-page-btn:hover:not(:disabled) {
+    background: var(--bg-hover);
+    color: var(--text-primary);
+}
+.rev-page-btn:disabled {
+    opacity: 0.35;
+    cursor: not-allowed;
+}
+.rev-page-btn--active {
+    background: var(--accent) !important;
+    border-color: var(--accent) !important;
+    color: #fff !important;
+    font-weight: 700;
+}
+
+/* ── Payment type tags ── */
+.rev-type-tag {
+    display: inline-block;
+    font-size: 0.68rem;
+    font-weight: 600;
+    padding: 2px 7px;
+    border-radius: 5px;
+    white-space: nowrap;
+}
+.rev-type-plan {
+    background: var(--accent-muted);
+    color: var(--accent);
+}
+.rev-type-tier {
+    background: rgba(234,179,8,0.12);
+    color: #EAB308;
 }

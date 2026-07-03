@@ -1,0 +1,26 @@
+@if (TotalPages > 1)
+{
+    <div class="gym-pagination">
+        <span class="gym-pagination-info">
+            Showing @((CurrentPage - 1) * PageSize + 1)–@(Math.Min(CurrentPage * PageSize, TotalItems)) of @TotalItems
+        </span>
+        <div class="gym-pagination-controls">
+            <button class="gym-page-btn" disabled="@(CurrentPage == 1)"
+                    @onclick='() => OnPageChanged.InvokeAsync(1)'>«</button>
+            <button class="gym-page-btn" disabled="@(CurrentPage == 1)"
+                    @onclick='() => OnPageChanged.InvokeAsync(CurrentPage - 1)'>‹</button>
+
+            @for (int p = Math.Max(1, CurrentPage - 2); p <= Math.Min(TotalPages, CurrentPage + 2); p++)
+            {
+                var pageNum = p;
+                <button class="gym-page-btn @(pageNum == CurrentPage ? "gym-page-btn--active" : "")"
+                        @onclick='() => OnPageChanged.InvokeAsync(pageNum)'>@pageNum</button>
+            }
+
+            <button class="gym-page-btn" disabled="@(CurrentPage == TotalPages)"
+                    @onclick='() => OnPageChanged.InvokeAsync(CurrentPage + 1)'>›</button>
+            <button class="gym-page-btn" disabled="@(CurrentPage == TotalPages)"
+                    @onclick='() => OnPageChanged.InvokeAsync(TotalPages)'>»</button>
+        </div>
+    </div>
+}

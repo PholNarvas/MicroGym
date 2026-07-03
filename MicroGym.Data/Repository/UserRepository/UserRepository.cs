@@ -41,7 +41,7 @@ namespace MicroGym.Data.Repository.UserRepository
             };
 
             var result = await connection.QueryFirstOrDefaultAsync(
-                "sp_RegisterUser",
+                "pr_RegisterUser",
                 parameters,
                 commandType: CommandType.StoredProcedure
             );

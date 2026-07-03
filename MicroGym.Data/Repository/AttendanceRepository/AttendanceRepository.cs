@@ -11,7 +11,8 @@ namespace MicroGym.Data.Repository.AttendanceRepository
 
         public AttendanceRepository(IConfiguration configuration)
         {
-            connectionString = configuration.GetConnectionString("DefaultConnection")!;
+            connectionString = configuration.GetConnectionString("DefaultConnection")
+                ?? throw new InvalidOperationException("DefaultConnection string is not configured in appsettings.");
         }
 
         public async Task<List<AttendanceModel>> GetTodayAttendanceAsync()
@@ -25,19 +26,40 @@ namespace MicroGym.Data.Repository.AttendanceRepository
             return result.ToList();
         }
 
+        public async Task<List<AttendanceModel>> GetAttendanceByDateAsync(DateTime date)
+        {
+            using var connection = new SqlConnection(connectionString);
+
+            var result = await connection.QueryAsync<AttendanceModel>(
+                "pr_GetAttendanceByDate",
+                new { Date = date.Date },
+                commandType: System.Data.CommandType.StoredProcedure);
+
+            return result.ToList();
+        }
+
+        public async Task<List<AttendanceDaySummary>> GetWeeklyAttendanceSummaryAsync()
+        {
+            using var connection = new SqlConnection(connectionString);
+
+            var result = await connection.QueryAsync<AttendanceDaySummary>(
+                "pr_GetWeeklyAttendanceSummary",
+                commandType: System.Data.CommandType.StoredProcedure);
+
+            return result.ToList();
+        }
+
         public async Task<bool> CheckInMemberAsync(int userId)
         {
             using var connection = new SqlConnection(connectionString);
 
-            // The service layer already validated expiry and duplicate before reaching here.
-            // SET NOCOUNT ON in the SP causes Dapper to return -1 regardless of rows inserted,
-            // so we trust the service-level guards and return true after execution.
-            await connection.ExecuteAsync(
+            // SP returns: 1 = success, 0 = already checked in, -1 = expired/not found
+            var result = await connection.ExecuteScalarAsync<int>(
                 "pr_CheckInMember",
                 new { UserID = userId },
                 commandType: System.Data.CommandType.StoredProcedure);
 
-            return true;
+            return result == 1;
         }
 
         public async Task<bool> IsAlreadyCheckedInAsync(int userId)

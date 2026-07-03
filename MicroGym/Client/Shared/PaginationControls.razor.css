@@ -1,0 +1,19 @@
+.gym-pagination {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0.75rem 1.25rem;
+    border-top: 1px solid var(--border-default);
+}
+.gym-pagination-info { font-size: 0.78rem; color: var(--text-muted); }
+.gym-pagination-controls { display: flex; gap: 4px; }
+.gym-page-btn {
+    min-width: 32px; height: 32px; padding: 0 8px;
+    border: 1px solid var(--border-default);
+    border-radius: 6px;
+    background: var(--bg-surface);
+    color: var(--text-secondary);
+    font-size: 0.8rem; cursor: pointer;
+    transition: all 0.15s;
+}
+.gym-page-btn:hover:not(:disabled) { border-color: var(--accent); color: var(--accent); }
+.gym-page-btn--active { background: var(--accent) !important; border-color: var(--accent) !important; color: #000 !important; font-weight: 700; }
+.gym-page-btn:disabled { opacity: 0.3; cursor: not-allowed; }

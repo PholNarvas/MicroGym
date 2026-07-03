@@ -12,7 +12,7 @@ namespace MicroGym.Service.RevenueSection
             _revenueRepository = revenueRepository;
         }
 
-        public async Task<List<Payment>> GetRevenueService(DateOnly month)
+        public async Task<List<RevenuePaymentDetail>> GetRevenueService(DateOnly month)
         {
             return await _revenueRepository.GetRevenue(month);
         }
@@ -20,6 +20,11 @@ namespace MicroGym.Service.RevenueSection
         public async Task<Revenue?> GetRevenueService()
         {
             return await _revenueRepository.GetYearlyRevenue();
+        }
+
+        public async Task<List<RevenueChartMonth>> GetRevenueChartByYearService(int year)
+        {
+            return await _revenueRepository.GetRevenueChartByYear(year);
         }
     }
 }

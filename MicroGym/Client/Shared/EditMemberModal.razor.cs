@@ -10,17 +10,17 @@ namespace MicroGym.Client.Shared
     {
         // ── Parameters ──────────────────────────────────────────
         [Parameter] public bool IsOpen    { get; set; }
-        [Parameter] public int  UserId    { get; set; }   // 0 = nothing loaded yet
+        [Parameter] public int  UserId    { get; set; }
         [Parameter] public EventCallback OnClose         { get; set; }
         [Parameter] public EventCallback OnMemberUpdated { get; set; }
 
         // ── Injected Services ───────────────────────────────────
-        [Inject] private MemberService             MemberService         { get; set; } = default!;
+        [Inject] private MemberService               MemberService         { get; set; } = default!;
         [Inject] private MembershipTypeClientService MembershipTypeService { get; set; } = default!;
 
         // ── Internal State ──────────────────────────────────────
-        private List<MembershipType> membershipTypes  = new();
-        private EditMemberDto        model            = new();
+        private List<MembershipType> membershipTypes    = new();
+        private EditMemberDto        model              = new();
         private string               editIsActiveString = string.Empty;
 
         private bool   isLoadingMember = false;
@@ -28,7 +28,6 @@ namespace MicroGym.Client.Shared
         private bool   editSuccess     = false;
         private string errorMessage    = string.Empty;
 
-        // Track last loaded ID to avoid re-fetching on every render
         private int _lastLoadedUserId = 0;
 
         protected override async Task OnInitializedAsync()
@@ -38,14 +37,12 @@ namespace MicroGym.Client.Shared
 
         protected override async Task OnParametersSetAsync()
         {
-            // Only fetch when the modal opens with a new/different UserId
             if (IsOpen && UserId > 0 && UserId != _lastLoadedUserId)
             {
                 _lastLoadedUserId = UserId;
                 await LoadMember(UserId);
             }
 
-            // Reset tracking when modal closes so next open always fetches fresh
             if (!IsOpen)
                 _lastLoadedUserId = 0;
         }
@@ -70,16 +67,15 @@ namespace MicroGym.Client.Shared
 
             model = new EditMemberDto
             {
-                UserId          = member.UserId,
-                FirstName       = member.FirstName,
-                LastName        = member.LastName,
-                Email           = member.Email,
-                Phone           = member.Phone,
+                UserId           = member.UserId,
+                FirstName        = member.FirstName,
+                LastName         = member.LastName,
+                Email            = member.Email,
+                Phone            = member.Phone,
                 MemberShipTypeID = member.MemberShipTypeID,
-                // Inactive = renewal (blank payment), Active = pre-fill last payment
-                Price           = member.IsActive ? member.Price         : null,
-                PaymentMethod   = member.IsActive ? member.PaymentMethod : null
+                IsActive         = member.IsActive
             };
+
             editIsActiveString = member.IsActive ? "true" : "false";
             isLoadingMember    = false;
         }
@@ -89,12 +85,7 @@ namespace MicroGym.Client.Shared
         private void OnMembershipTypeChanged(ChangeEventArgs e)
         {
             if (int.TryParse(e.Value?.ToString(), out var typeId))
-            {
                 model.MemberShipTypeID = typeId;
-                var selected = membershipTypes.FirstOrDefault(mt => mt.MembershipTypeID == typeId);
-                if (selected is not null)
-                    model.Price = selected.Price;
-            }
         }
 
         private async Task HandleSubmit()
@@ -106,19 +97,28 @@ namespace MicroGym.Client.Shared
                            : editIsActiveString == "false" ? false
                            : null;
 
-            var success = await MemberService.SaveMemberInfo(model);
-
-            if (success)
+            try
             {
-                editSuccess = true;
-                await OnMemberUpdated.InvokeAsync();
-            }
-            else
-            {
-                errorMessage = "Failed to update member. Please try again.";
-            }
+                var success = await MemberService.SaveMemberInfo(model);
 
-            isEditing = false;
+                if (success)
+                {
+                    editSuccess = true;
+                    await OnMemberUpdated.InvokeAsync();
+                }
+                else
+                {
+                    errorMessage = "Failed to update member. Please try again.";
+                }
+            }
+            catch (Exception ex)
+            {
+                errorMessage = ex.Message;
+            }
+            finally
+            {
+                isEditing = false;
+            }
         }
 
         private async Task HandleClose()
@@ -127,6 +127,7 @@ namespace MicroGym.Client.Shared
             editIsActiveString = string.Empty;
             errorMessage       = string.Empty;
             editSuccess        = false;
+            isEditing          = false;
             _lastLoadedUserId  = 0;
             await OnClose.InvokeAsync();
         }

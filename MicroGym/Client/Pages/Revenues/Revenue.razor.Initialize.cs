@@ -16,24 +16,58 @@ namespace MicroGym.Client.Pages.Revenues
 
         private async Task Initialize()
         {
-            isLoading    = true;
-            chartLoading = true;
-            StateHasChanged();
+            try
+            {
+                isLoading    = true;
+                chartLoading = true;
+                StateHasChanged();
 
-            // ── Load stat cards first (fast) ───────────────────
-            var payments = await RevenueService.GetRevenue(selectedMonth, selectedYear);
-            var revenue  = await GetYearlyRevenue();
+                // Previous month (handles Jan → Dec of prior year)
+                var prevMonth = selectedMonth == 1 ? 12 : selectedMonth - 1;
+                var prevYear  = selectedMonth == 1 ? selectedYear - 1 : selectedYear;
 
-            totalEarnings  = revenue?.TotalRevenue ?? 0;
-            monthlyIncome  = payments.Where(p => p.Status == "Paid").Sum(p => p.AmountPaid);
-            monthlyExpense = payments.Where(p => p.Status == "Expense").Sum(p => p.AmountPaid);
+                // Fetch current month, yearly total, and previous month in parallel
+                var currentTask  = RevenueService.GetRevenue(selectedMonth, selectedYear);
+                var yearlyTask   = GetYearlyRevenue();
+                var previousTask = RevenueService.GetRevenue(prevMonth, prevYear);
 
-            isLoading = false;
-            StateHasChanged(); // show stat cards
+                await Task.WhenAll(currentTask, yearlyTask, previousTask);
 
-            // ── Load chart data (12 months) ────────────────────
-            await LoadChartData();
-            StateHasChanged(); // triggers OnAfterRenderAsync → renders chart
+                var payments     = currentTask.Result;
+                var revenue      = yearlyTask.Result;
+                var prevPayments = previousTask.Result;
+
+                // KPI cards
+                paymentDetails      = payments;
+                totalEarnings       = revenue?.TotalRevenue ?? 0;
+                monthlyIncome       = payments.Where(p => p.Status == "Paid").Sum(p => p.AmountPaid);
+                monthlyExpense      = payments.Where(p => p.Status == "Expense").Sum(p => p.AmountPaid);
+                monthlyNet          = monthlyIncome - monthlyExpense;
+                previousMonthIncome = prevPayments.Where(p => p.Status == "Paid").Sum(p => p.AmountPaid);
+
+                // Plan vs Tier breakdown
+                planIncome = payments.Where(p => p.Status == "Paid" && p.PaymentType == "Plan").Sum(p => p.AmountPaid);
+                tierIncome = payments.Where(p => p.Status == "Paid" && p.PaymentType == "Tier").Sum(p => p.AmountPaid);
+
+                isLoading = false;
+                StateHasChanged();
+
+                await LoadChartData();
+                StateHasChanged();
+            }
+            catch (HttpRequestException ex) when (ex.StatusCode == System.Net.HttpStatusCode.Unauthorized)
+            {
+                NavigationManager.NavigateTo("/login");
+            }
+            catch (Exception)
+            {
+                // Network failure or bad JSON — stat cards stay at zero.
+            }
+            finally
+            {
+                isLoading    = false;
+                chartLoading = false;
+            }
         }
     }
 }

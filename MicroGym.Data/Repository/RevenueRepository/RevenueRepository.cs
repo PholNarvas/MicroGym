@@ -12,23 +12,18 @@ namespace MicroGym.Data.Repository.RevenueRepository
 
         public RevenueRepository(IConfiguration configuration)
         {
-            connectionString = configuration.GetConnectionString("DefaultConnection")!;
+            connectionString = configuration.GetConnectionString("DefaultConnection")
+                ?? throw new InvalidOperationException("DefaultConnection string is not configured in appsettings.");
         }
 
-        public async Task<List<Payment>> GetRevenue(DateOnly month)
+        public async Task<List<RevenuePaymentDetail>> GetRevenue(DateOnly month)
         {
             using var connection = new SqlConnection(connectionString);
 
-            var parameters = new
-            {
-                Months = month.ToDateTime(TimeOnly.MinValue)
-            };
-
-            var result = await connection.QueryAsync<Payment>(
+            var result = await connection.QueryAsync<RevenuePaymentDetail>(
                 "pr_GetRevenues",
-                parameters,
-                commandType: CommandType.StoredProcedure
-            );
+                new { Months = month.ToDateTime(TimeOnly.MinValue) },
+                commandType: CommandType.StoredProcedure);
 
             return result.ToList();
         }
@@ -38,9 +33,20 @@ namespace MicroGym.Data.Repository.RevenueRepository
             using var connection = new SqlConnection(connectionString);
 
             return await connection.QueryFirstOrDefaultAsync<Revenue>(
-            "pr_GetYearlyRevenue",
-            commandType: CommandType.StoredProcedure);
+                "pr_GetYearlyRevenue",
+                commandType: CommandType.StoredProcedure);
+        }
 
+        public async Task<List<RevenueChartMonth>> GetRevenueChartByYear(int year)
+        {
+            using var connection = new SqlConnection(connectionString);
+
+            var result = await connection.QueryAsync<RevenueChartMonth>(
+                "pr_GetRevenueChartByYear",
+                new { Year = year },
+                commandType: CommandType.StoredProcedure);
+
+            return result.ToList();
         }
     }
 }

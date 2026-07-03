@@ -1,6 +1,63 @@
 /* Home Dashboard styles are in wwwroot/css/app.css under HOME DASHBOARD — Category Cards */
 
-/* ═══ Input prefix (peso sign) — needed here because MemberDashBoard.razor.css is scoped) ═══ */
+/* ═══ Expiring Table ═══ */
+.home-expiring-card .home-table-body { min-height: 460px; }
+
+.home-expiring-table {
+    table-layout: fixed;
+    width: 100%;
+}
+
+/* Column widths — 5 columns: Name, Phone, Plan, Subscription Expiry, Annual Expiry */
+.home-expiring-table th:nth-child(1),
+.home-expiring-table td:nth-child(1) { width: 28%; }
+
+.home-expiring-table th:nth-child(2),
+.home-expiring-table td:nth-child(2) { width: 16%; }
+
+.home-expiring-table th:nth-child(3),
+.home-expiring-table td:nth-child(3) { width: 18%; }
+
+.home-expiring-table th:nth-child(4),
+.home-expiring-table td:nth-child(4) { width: 19%; }
+
+.home-expiring-table th:nth-child(5),
+.home-expiring-table td:nth-child(5) { width: 19%; }
+
+/* ═══ Search + Sort Toolbar ═══ */
+.home-sort-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-size: 0.78rem;
+    font-weight: 600;
+    border: 1px solid var(--border);
+    background: var(--surface-2);
+    color: var(--text-secondary);
+    cursor: pointer;
+    white-space: nowrap;
+    transition: color 0.15s, border-color 0.15s, background 0.15s;
+}
+.home-sort-btn:hover {
+    color: var(--text-primary);
+    border-color: var(--primary);
+}
+
+/* All headers and cells left-aligned */
+.home-expiring-table thead > tr > th,
+.home-expiring-table tbody > tr > td { text-align: left !important; }
+
+/* Prevent text overflow in narrow columns */
+.home-expiring-table tbody > tr > td {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+
+/* ═══ Input prefix (peso sign) ═══ */
 .gym-input-prefix-wrap { position: relative; display: flex; align-items: center; width: 100%; }
 .gym-input-prefix-wrap .ant-input { width: 100%; }
 .gym-input-prefix { position: absolute; left: 12px; color: var(--text-secondary); font-size: 0.9rem; pointer-events: none; z-index: 1; }

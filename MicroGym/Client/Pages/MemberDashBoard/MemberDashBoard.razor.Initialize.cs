@@ -4,12 +4,25 @@ namespace MicroGym.Client.Pages
     {
         protected override async Task OnInitializedAsync()
         {
-            isLoading = true;
+            try
+            {
+                isLoading = true;
 
-            allMembers      = await GetMembers();
-            filteredMembers = allMembers;
-
-            isLoading = false;
+                allMembers      = await GetMembers();
+                filteredMembers = allMembers;
+            }
+            catch (HttpRequestException ex) when (ex.StatusCode == System.Net.HttpStatusCode.Unauthorized)
+            {
+                NavigationManager.NavigateTo("/login");
+            }
+            catch (Exception)
+            {
+                // Network failure or bad JSON — list stays empty.
+            }
+            finally
+            {
+                isLoading = false;
+            }
         }
     }
 }

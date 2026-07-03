@@ -13,25 +13,29 @@ namespace MicroGym.Client.Pages.Revenues
             "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
         };
 
-        /// <summary>Fetches income/expense for every month in the selected year in parallel.</summary>
+        /// <summary>
+        /// Fetches income/expense for all 12 months in a single SP call
+        /// instead of 12 separate requests.
+        /// </summary>
         private async Task LoadChartData()
         {
-            chartLoading   = true;
+            chartLoading = true;
             chartDataReady = false;
 
-            var tasks = Enumerable.Range(1, 12)
-                .Select(m => RevenueService.GetRevenue(m, selectedYear))
-                .ToArray();
+            // Reset arrays so months with no data show as zero
+            chartIncomeData = new double[12];
+            chartExpenseData = new double[12];
 
-            var results = await Task.WhenAll(tasks);
+            var rows = await RevenueService.GetRevenueChartByYearAsync(selectedYear);
 
-            for (int i = 0; i < 12; i++)
+            foreach (var row in rows)
             {
-                chartIncomeData[i]  = (double)results[i].Where(p => p.Status == "Paid").Sum(p => p.AmountPaid);
-                chartExpenseData[i] = (double)results[i].Where(p => p.Status == "Expense").Sum(p => p.AmountPaid);
+                var index = row.Month - 1; // Month is 1-based, array is 0-based
+                chartIncomeData[index] = (double)row.Income;
+                chartExpenseData[index] = (double)row.Expense;
             }
 
-            chartLoading   = false;
+            chartLoading = false;
             chartDataReady = true;
         }
 
@@ -48,5 +52,31 @@ namespace MicroGym.Client.Pages.Revenues
                     chartExpenseData);
             }
         }
+        private IEnumerable<(string Method, decimal Amount)> paymentMethodBreakdown =>
+      paymentDetails
+          .Where(p => p.Status == "Paid")
+          .GroupBy(p => p.PaymentMethod)
+          .Select(g => (Method: g.Key, Amount: g.Sum(p => p.AmountPaid)))
+          .OrderByDescending(x => x.Amount);
+
+        // ?? Computed: Month-over-month ?????????????????????????
+        private string MoMText
+        {
+            get
+            {
+                if (previousMonthIncome == 0)
+                    return monthlyIncome > 0 ? "New data this month" : "No data";
+
+                var diff = monthlyIncome - previousMonthIncome;
+                var pct = Math.Abs(diff) / previousMonthIncome * 100;
+                return diff >= 0
+                    ? $"? {pct:N0}% vs last month"
+                    : $"? {pct:N0}% vs last month";
+            }
+        }
+
+        private string MoMClass => previousMonthIncome == 0
+            ? "mom-neutral"
+            : monthlyIncome >= previousMonthIncome ? "mom-up" : "mom-down";
     }
 }

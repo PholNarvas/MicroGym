@@ -10,30 +10,36 @@ namespace MicroGym.Client.Pages.HomeDashBoard
         private string currentUserName = string.Empty;
 
         // ── Counts ─────────────────────────────────────────────
-        private int totalMembers         = 0;
-        private int boxingTaekwondoCount = 0;
-        private int gymMemberCount       = 0;
-        private int zumbaMemberCount     = 0;
-        private int todayCheckInCount    = 0;
+        private int totalMembers       = 0;
+        private int totalActiveMembers = 0;
+        private int todayCheckInCount  = 0;
 
         // ── Member Lists ────────────────────────────────────────
-        private List<User>           boxingMembers   = new();
-        private List<User>           gymMembers      = new();
-        private List<User>           zumbaMembers    = new();
-        private List<User>           expiringMembers = new();
-        // ── Selected Category ───────────────────────────────────
-        private int selectedCategory = 0;
+        private List<User> expiringMembers = new();
+
+        // ── Search & Sort ────────────────────────────────────────
+        private string searchText    = string.Empty;
+        private bool   sortAscending = true;  // true = soonest expiry first (most urgent)
+
+        private List<User> displayedMembers
+        {
+            get
+            {
+                var search = searchText.Trim().ToLower();
+                var query  = expiringMembers.Where(m => MatchesAlertSearch(m, search));
+                return sortAscending
+                    ? query.OrderBy(m => m.ExpiryDate ?? DateTime.MaxValue).ToList()
+                    : query.OrderByDescending(m => m.ExpiryDate ?? DateTime.MinValue).ToList();
+            }
+        }
+
+        // ── Expiring Members Pagination ─────────────────────────
+        private int            expiryPage       = 1;
+        private const int      ExpiryPageSize   = 30;
+        private int            expiryTotalPages => TotalPages(displayedMembers, ExpiryPageSize);
+        private List<User>     pagedExpiring    => GetPagedItems(displayedMembers, expiryPage, ExpiryPageSize);
 
         // ── Add Member Modal ────────────────────────────────────
         private bool showAddModal = false;
-
-        // ── Helpers ─────────────────────────────────────────────
-        private string GetGreeting()
-        {
-            var h = DateTime.Now.Hour;
-            if (h < 12) return "Good morning";
-            if (h < 17) return "Good afternoon";
-            return "Good evening";
-        }
     }
 }

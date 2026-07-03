@@ -16,13 +16,12 @@ namespace MicroGym.Client.Pages.BaseApplicationMethods
         // Example: June 26, 2026  |  Expired: March 01, 2025  |  No expiry set
         public string FormatExpiryDate(DateTime? expiryDate)
         {
-            if (!expiryDate.HasValue) return "No expiry set";
+            if (!expiryDate.HasValue)
+                return "No expiry set";
 
             var formatted = expiryDate.Value.ToString("MMMM dd, yyyy");
 
-            return expiryDate.Value.Date < DateTime.Today
-                ? $"Expired: {formatted}"
-                : formatted;
+            return formatted;
         }
 
         // Example: "Today", "Yesterday", "3 days ago", "2 weeks ago"
@@ -38,6 +37,58 @@ namespace MicroGym.Client.Pages.BaseApplicationMethods
 
             var weeksAgo = daysAgo / 7;
             return weeksAgo == 1 ? "1 week ago" : $"{weeksAgo} weeks ago";
+        }
+
+        // ── Pagination Helpers ───────────────────────────────────
+
+        // Returns one page of items from a list.
+        protected static List<T> GetPagedItems<T>(IEnumerable<T> source, int page, int pageSize)
+            => source.Skip((page - 1) * pageSize).Take(pageSize).ToList();
+
+        // Returns the total number of pages needed for a list.
+        protected static int TotalPages<T>(IEnumerable<T> source, int pageSize)
+        {
+            var count = source.Count();
+            return count == 0 ? 1 : (int)Math.Ceiling(count / (double)pageSize);
+        }
+        public string GetExpiryTagClass(int daysLeft)
+        {
+            if (daysLeft <= 0) return "ant-tag-red";     // expired
+            if (daysLeft <= 7) return "ant-tag-orange";  // expiring this week
+            if (daysLeft <= 15) return "ant-tag-gold";    // expiring this month
+            return "ant-tag-green";                       // plenty of time left
+        }
+
+        public string GetExpiryTagText(int daysLeft)
+        {
+            if (daysLeft < 0)  return "EXPIRED";
+            if (daysLeft == 0) return "Tomorrow";
+            return $"{daysLeft}d left";
+        }
+
+        public (string text, string css) GetAnnualLeft(User m)
+        {
+            if (m.TierID == null || !m.TierExpiryDate.HasValue)
+                return ("—", string.Empty);
+
+            var days = (m.TierExpiryDate.Value.Date - DateTime.Today).Days;
+
+            if (days < 0)
+                return ("EXPIRED", "ant-tag-red");
+
+            if (days < 30)
+                return ($"{days}d", "ant-tag-orange");
+
+            var months = (int)Math.Floor(days / 30.4);
+            return ($"{months}mo", "ant-tag-gold");
+        }
+
+        public string GetGreeting()
+        {
+            var h = DateTime.Now.Hour;
+            if (h < 12) return "Good morning";
+            if (h < 17) return "Good afternoon";
+            return "Good evening";
         }
     }
 }
