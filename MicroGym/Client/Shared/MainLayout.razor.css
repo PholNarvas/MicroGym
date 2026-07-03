@@ -1,11 +1,39 @@
+/* ── Navigation Progress Bar ───────────────────── */
+.nav-progress-bar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 3px;
+    background: var(--accent);
+    z-index: 9999;
+    animation: nav-progress 700ms cubic-bezier(0.4, 0, 0.2, 1) forwards;
+    box-shadow: 0 0 8px var(--accent-glow);
+}
+
+@keyframes nav-progress {
+    0%   { width: 0%;   opacity: 1; }
+    60%  { width: 80%;  opacity: 1; }
+    85%  { width: 95%;  opacity: 1; }
+    100% { width: 100%; opacity: 0; }
+}
+
+/* ── Layout ─────────────────────────────────────── */
 .main-layout {
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
     min-height: 100vh;
-    background: #0A0A0A;
+    background: var(--bg-base);
+    transition: background 0.2s;
 }
 
 .main-content {
     flex: 1;
-    background: #0A0A0A;
+    min-width: 0;
+    background: var(--bg-base);
+    overflow-x: hidden;
+    transition: background 0.2s;
+}
+
+@media (max-width: 768px) {
+    .main-layout { flex-direction: column; }
 }

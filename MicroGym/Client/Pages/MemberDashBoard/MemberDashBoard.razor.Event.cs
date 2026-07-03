@@ -1,3 +1,4 @@
+using MicroGym.Shared.Model;
 using Microsoft.AspNetCore.Components;
 
 namespace MicroGym.Client.Pages
@@ -10,9 +11,9 @@ namespace MicroGym.Client.Pages
             HandleSearch();
         }
 
-        private void OnStatusChange(ChangeEventArgs e)
+        private void OnCardFilter(string filter)
         {
-            statusFilter = e.Value?.ToString() ?? string.Empty;
+            statusFilter = filter;
             HandleSearch();
         }
 
@@ -28,10 +29,58 @@ namespace MicroGym.Client.Pages
                     m.Email.ToLower().Contains(search);
 
                 var matchesStatus = string.IsNullOrEmpty(statusFilter) ||
-                    m.Status == statusFilter;
+                    (statusFilter == "Active" ? m.IsActive : !m.IsActive);
 
                 return matchesSearch && matchesStatus;
             }).ToList();
+
+            currentPage = 1;
+        }
+
+        private void OpenModal() => showAddModal = true;
+        private void CloseAddModal() => showAddModal = false;
+
+        private void OnEdit(User user)
+        {
+            editUserId = user.UserId;
+            showEditModal = true;
+        }
+
+        private void CloseEditModal()
+        {
+            showEditModal = false;
+            editUserId = 0;
+        }
+
+        private void OnDelete(User user)
+        {
+            memberToDelete = user;
+            showDeleteModal = true;
+        }
+
+        private void CloseDeleteModal()
+        {
+            memberToDelete = null;
+            showDeleteModal = false;
+        }
+
+        private async Task ConfirmDelete()
+        {
+            if (memberToDelete is null) return;
+
+            isDeleting = true;
+
+            var success = await DeleteMember(memberToDelete.UserId);
+
+            if (success)
+            {
+                allMembers = await GetMembers();
+                HandleSearch();
+            }
+
+            isDeleting = false;
+            showDeleteModal = false;
+            memberToDelete = null;
         }
     }
 }

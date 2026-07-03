@@ -1,0 +1,28 @@
+@namespace MicroGym.Client.Shared
+
+@if (IsOpen)
+{
+    <div class="gym-modal-overlay">
+        <div class="gym-modal @(MaxWidth is not null ? "" : "")"
+             style="@(MaxWidth is not null ? $"max-width:{MaxWidth}" : "")">
+
+            <!-- Header -->
+            <div class="gym-modal-header">
+                <div>
+                    <h2 class="gym-modal-title">@Title</h2>
+                    @if (!string.IsNullOrEmpty(Subtitle))
+                    {
+                        <p class="gym-modal-subtitle">@Subtitle</p>
+                    }
+                </div>
+                <button class="gym-modal-close" @onclick="HandleClose" title="Close">✕</button>
+            </div>
+
+            <!-- Body -->
+            <div class="gym-modal-body">
+                @ChildContent
+            </div>
+
+        </div>
+    </div>
+}

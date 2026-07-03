@@ -1,0 +1,106 @@
+/* ═══ Overlay ═══ */
+.gym-modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(4px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    padding: 1rem;
+    animation: overlayFadeIn 0.18s ease;
+}
+@keyframes overlayFadeIn {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+}
+
+/* ═══ Modal Container ═══ */
+.gym-modal {
+    background: var(--bg-elevated);
+    border: 1px solid var(--border-default);
+    border-radius: 14px;
+    width: 100%;
+    max-width: 680px;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: var(--shadow-lg);
+    animation: modalSlideIn 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+}
+@keyframes modalSlideIn {
+    from { opacity: 0; transform: translateY(14px) scale(0.98); }
+    to   { opacity: 1; transform: translateY(0)    scale(1);    }
+}
+
+/* ═══ Header ═══ */
+.gym-modal-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    padding: 1.25rem 1.5rem 1rem;
+    border-bottom: 1px solid var(--border-default);
+    position: sticky;
+    top: 0;
+    background: var(--bg-elevated);
+    z-index: 1;
+}
+.gym-modal-title {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin: 0 0 2px;
+}
+.gym-modal-subtitle {
+    margin: 0;
+    font-size: 0.78rem;
+    color: var(--text-secondary);
+}
+.gym-modal-close {
+    background: transparent;
+    border: 1px solid var(--border-default);
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+    cursor: pointer;
+    width: 28px;
+    height: 28px;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.15s;
+    flex-shrink: 0;
+    margin-top: 2px;
+}
+.gym-modal-close:hover {
+    background: var(--danger-muted);
+    border-color: rgba(248,81,73,0.35);
+    color: var(--danger);
+}
+
+/* ═══ Body ═══ */
+.gym-modal-body {
+    padding: 1.5rem;
+}
+
+/* ═══ Footer / Section Label (RenderFragment deep) ═══ */
+::deep .gym-modal-footer {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 0.75rem;
+    margin-top: 1.5rem;
+    padding-top: 1.25rem;
+    border-top: 1px solid var(--border-default);
+}
+::deep .gym-modal-section-label {
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    color: var(--accent);
+    margin: 1.25rem 0 1rem;
+    padding-top: 1.25rem;
+    border-top: 1px solid var(--border-default);
+}
+::deep .gym-alert { margin-bottom: 1rem; }

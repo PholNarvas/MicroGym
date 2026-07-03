@@ -1,56 +1,129 @@
-<nav class="top-navbar">
+<aside class="sidebar @(!collapseNavMenu ? "sidebar-open" : "")">
 
-    <!-- Brand -->
-    <a href="/" class="navbar-brand-link">
-        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z" />
-        </svg>
-        MICRO<span class="brand-accent">GYM</span>
-    </a>
+    <!-- ── Brand ─────────────────────────────────── -->
+    <div class="sidebar-brand-wrap">
+        <a href="/" class="sidebar-brand-link">
+            <div class="sb-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none"
+                     viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                          d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z"/>
+                </svg>
+            </div>
+            <span class="sb-brand-text">MICRO<span class="sb-brand-accent">GYM</span></span>
+        </a>
+    </div>
 
-    <!-- Left Nav Links -->
-    <div class="navbar-left-links">
+    <!-- ── Navigation ────────────────────────────── -->
+    <nav class="sidebar-nav">
         <AuthorizeView>
             <Authorized>
-                <NavLink class="nav-link-item" href="" Match="NavLinkMatch.All">
-                    Home
+                <p class="sidebar-nav-label">Navigation</p>
+
+                <NavLink class="sidebar-link" href="" Match="NavLinkMatch.All">
+                    <svg class="sb-link-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24"
+                         fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                              d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
+                    </svg>
+                    <span>Home</span>
                 </NavLink>
-                <NavLink class="nav-link-item" href="member-dashboard">
-                    Members
+
+                <NavLink class="sidebar-link" href="member-dashboard">
+                    <svg class="sb-link-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24"
+                         fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                              d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/>
+                    </svg>
+                    <span>Members</span>
+                </NavLink>
+
+                <NavLink class="sidebar-link" href="admin-attendance">
+                    <svg class="sb-link-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24"
+                         fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                              d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/>
+                    </svg>
+                    <span>Attendance</span>
+                </NavLink>
+
+                <NavLink class="sidebar-link" href="admin-revenue">
+                    <svg class="sb-link-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24"
+                         fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                              d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+                    </svg>
+                    <span>Revenue</span>
                 </NavLink>
             </Authorized>
         </AuthorizeView>
-    </div>
+    </nav>
 
-    <!-- Right: Logout -->
-    <div class="navbar-right">
+    <!-- ── Footer: User + Controls ───────────────── -->
+    <div class="sidebar-footer">
         <AuthorizeView>
             <Authorized>
-                <button class="nav-logout-btn" @onclick="HandleLogout">
-                    Logout
-                </button>
+                <div class="sidebar-user-block">
+                    <div class="sidebar-user-avatar">@userInitials</div>
+                    <div class="sidebar-user-meta">
+                        <span class="sidebar-user-name">@userName</span>
+                        <span class="sidebar-user-role">Gym Owner</span>
+                    </div>
+                </div>
+
+                <div class="sidebar-controls">
+                    <button class="sb-ctrl-btn" @onclick="ToggleTheme"
+                            title="@(ThemeService.IsDark ? "Switch to Light Mode" : "Switch to Dark Mode")">
+                        @if (ThemeService.IsDark)
+                        {
+                            <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" fill="none"
+                                 viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <circle cx="12" cy="12" r="4"/>
+                                <path stroke-linecap="round" d="M12 2v2M12 20v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M2 12h2M20 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/>
+                            </svg>
+                            <span>Light Mode</span>
+                        }
+                        else
+                        {
+                            <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" fill="none"
+                                 viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round"
+                                      d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/>
+                            </svg>
+                            <span>Dark Mode</span>
+                        }
+                    </button>
+
+                    <button class="sb-ctrl-btn sb-ctrl-logout" @onclick="HandleLogout" title="Sign out">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" fill="none"
+                             viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                  d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
+                        </svg>
+                        <span>Sign Out</span>
+                    </button>
+                </div>
             </Authorized>
             <NotAuthorized>
-                <NavLink class="nav-link-item" href="login">Sign In</NavLink>
+                <a href="login" class="sidebar-link">Sign In</a>
             </NotAuthorized>
         </AuthorizeView>
     </div>
 
-    <!-- Mobile toggle -->
-    <button class="mobile-toggle" @onclick="ToggleNavMenu">☰</button>
+</aside>
 
-</nav>
-
-<!-- Mobile dropdown -->
-<div class="mobile-menu @(collapseNavMenu ? "hidden" : "")">
-    <AuthorizeView>
-        <Authorized>
-            <NavLink class="mobile-nav-item" href="" Match="NavLinkMatch.All" @onclick="ToggleNavMenu">Home</NavLink>
-            <NavLink class="mobile-nav-item" href="member-dashboard" @onclick="ToggleNavMenu">Members</NavLink>
-            <button class="mobile-nav-item mobile-logout" @onclick="HandleLogout">Logout</button>
-        </Authorized>
-        <NotAuthorized>
-            <NavLink class="mobile-nav-item" href="login" @onclick="ToggleNavMenu">Sign In</NavLink>
-        </NotAuthorized>
-    </AuthorizeView>
+<!-- ── Mobile Top Bar ─────────────────────────── -->
+<div class="mobile-topbar">
+    <button class="mobile-hamburger" @onclick="ToggleNavMenu">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none"
+             viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"/>
+        </svg>
+    </button>
+    <span class="mobile-brand">MICRO<span class="sb-brand-accent">GYM</span></span>
 </div>
+
+@if (!collapseNavMenu)
+{
+    <div class="sidebar-overlay" @onclick="ToggleNavMenu"></div>
+}

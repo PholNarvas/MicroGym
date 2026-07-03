@@ -28,11 +28,16 @@ namespace MicroGym.Data.Repository.UserRepository
 
             var parameters = new
             {
-                user.Username,
+                user.MemberShipTypeID,
+                user.FirstName,
+                user.LastName,
                 user.Email,
+                user.Phone,
                 user.PasswordHash,
                 user.Role,
-                user.CreatedAt
+                user.CreatedAt,
+                user.PaymentMethod,
+                PaymentAmount = user.Price
             };
 
             var result = await connection.QueryFirstOrDefaultAsync(

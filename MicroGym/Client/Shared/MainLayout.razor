@@ -1,5 +1,13 @@
 @inherits LayoutComponentBase
 
+@if (isNavigating)
+{
+    <div class="nav-progress-bar"></div>
+}
+
+<SessionMonitor />
+<AppModal />
+
 <div class="main-layout">
     <NavMenu />
     <div class="main-content">
